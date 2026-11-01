@@ -1,0 +1,177 @@
+.auth {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--screen);
+}
+
+.auth__aside {
+  background-image: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0 2px, transparent 2px 14px);
+  padding: 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.auth__headline {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(56px, 7vw, 110px);
+  line-height: 0.82;
+  text-transform: uppercase;
+}
+
+.auth__sub {
+  font-size: 17px;
+  color: #4a3a33;
+  max-width: 440px;
+  line-height: 1.5;
+}
+
+.auth__panel {
+  padding: 56px 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+  min-width: 0;
+}
+
+.auth__title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 52px;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth__or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--ink-6);
+}
+
+.auth__or::before,
+.auth__or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* OTP: six boxes with one invisible input on top */
+.otp {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.otp__box {
+  height: 56px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1.5px solid var(--line-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.otp__box[data-filled='true'] {
+  border-color: var(--ink-6);
+}
+
+.otp__box[data-cursor='true'] {
+  border-color: var(--accent);
+}
+
+.otp__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: text;
+  width: 100%;
+  border: none;
+  background: transparent;
+}
+
+/* Forgot-password progress bars */
+.fpsteps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.fpstep {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fpstep__bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line-strong);
+}
+
+.fpstep[data-state='done'] .fpstep__bar {
+  background: var(--ok);
+}
+
+.fpstep[data-state='current'] .fpstep__bar {
+  background: var(--accent);
+}
+
+.fpstep__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-5);
+}
+
+.fpstep[data-state='done'] .fpstep__label {
+  color: var(--ok);
+}
+
+.fpstep[data-state='current'] .fpstep__label {
+  color: var(--ink);
+}
+
+.pw-rules {
+  display: flex;
+  gap: 18px;
+  font-size: 13px;
+  color: var(--ink-3);
+  flex-wrap: wrap;
+}
+
+.pw-rules__ok {
+  color: var(--ok);
+  font-weight: 700;
+}
+
+@media (max-width: 1000px) {
+  .auth {
+    grid-template-columns: 1fr;
+  }
+
+  .auth__aside {
+    display: none;
+  }
+
+  .auth__panel {
+    padding: 40px 28px;
+    min-height: 100vh;
+  }
+}

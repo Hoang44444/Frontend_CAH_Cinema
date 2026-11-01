@@ -1,0 +1,514 @@
+/* ---------- 5a Reports ---------- */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 2fr repeat(5, 1fr);
+  gap: 12px;
+}
+
+.kpi {
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.kpi--hero {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.kpi__label {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.kpi__value {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 32px;
+  line-height: 1;
+}
+
+.kpi--hero .kpi__value {
+  font-size: 48px;
+}
+
+.kpi__delta {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-4);
+}
+
+.kpi--hero .kpi__delta {
+  color: var(--accent-ink);
+}
+
+/* Daily revenue bars */
+.chart {
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.chart__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  min-width: 2px;
+}
+
+.chart__bar {
+  background: var(--accent);
+  transition: height 0.2s ease;
+}
+
+.chart__bar--top {
+  background: var(--seat-couple);
+  border-radius: 3px 3px 0 0;
+}
+
+.chart__axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--ink-5);
+  margin-top: -8px;
+}
+
+.legend-row {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--ink-3);
+  flex-wrap: wrap;
+}
+
+.legend-row__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-row__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 110px 70px;
+  gap: 12px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.bar-row__name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-row__track {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.bar-row__fill {
+  height: 100%;
+  border-radius: 5px;
+  background: var(--accent);
+}
+
+.split-2 {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.list-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  gap: 12px;
+}
+
+/* ---------- 5b Movies ---------- */
+
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.movie-row__poster {
+  width: 36px;
+  height: 52px;
+  border-radius: var(--r-sm);
+  flex: none;
+}
+
+/* ---------- 5c Cinemas / rooms / seats ---------- */
+
+.rooms-split {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  flex: 1;
+  min-width: 0;
+}
+
+.rooms-side {
+  border-right: 1px solid var(--line);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.cinema-item {
+  padding: 12px;
+  border-radius: var(--r-md);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  color: inherit;
+  width: 100%;
+}
+
+.cinema-item[data-active='true'] {
+  background: var(--accent-soft);
+}
+
+.cinema-item:hover:not([data-active='true']) {
+  background: var(--surface);
+}
+
+.rooms-main {
+  padding: 22px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.room-tab {
+  padding: 8px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--line-strong);
+  color: var(--ink-3);
+  background: transparent;
+  white-space: nowrap;
+}
+
+.room-tab[data-active='true'] {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+.room-tab--add {
+  border-style: dashed;
+  color: var(--ink-4);
+}
+
+/* ---------- 5d Showtimes timeline ---------- */
+
+.timeline {
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  min-width: 720px;
+}
+
+.timeline__head,
+.timeline__row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+}
+
+.timeline__head {
+  background: var(--surface);
+}
+
+.timeline__hours {
+  display: grid;
+  font-size: 11px;
+  color: var(--ink-5);
+  font-family: var(--font-mono);
+}
+
+.timeline__hour {
+  padding: 8px 0 8px 4px;
+  border-left: 1px solid var(--line);
+}
+
+.timeline__row {
+  border-top: 1px solid var(--line);
+}
+
+.timeline__room {
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.timeline__lane {
+  position: relative;
+  height: 84px;
+}
+
+.timeline__block {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  border-radius: 8px;
+  padding: 6px 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1.5px solid;
+  text-align: left;
+  min-width: 0;
+}
+
+.timeline__block-title {
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeline__block-time {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  opacity: 0.8;
+}
+
+/* ---------- 5e Price & holidays ---------- */
+
+.price-grid {
+  display: grid;
+  grid-template-columns: 140px repeat(3, 1fr);
+  gap: 8px;
+  font-size: 13px;
+  align-items: center;
+}
+
+.price-cell {
+  height: 56px;
+  border-radius: var(--r-md);
+  background: var(--surface-muted);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 14px;
+  gap: 2px;
+}
+
+.price-cell[data-high='true'] {
+  background: #fbebd0;
+}
+
+.price-cell__m {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.price-cell__p {
+  font-size: 11px;
+  color: var(--ink-5);
+}
+
+.price-cell__input {
+  width: 72px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 15px;
+  background: var(--surface);
+}
+
+.mult-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.mult {
+  padding: 12px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--line-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.holiday-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- 5g Foods ---------- */
+
+.food-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.food-admin {
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.food-admin__img {
+  height: 120px;
+  background: var(--surface-image);
+  background-image: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.04) 0 2px, transparent 2px 10px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 10px;
+  object-fit: cover;
+}
+
+.food-admin__cat {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.75);
+  padding: 3px 7px;
+  border-radius: var(--r-sm);
+}
+
+.food-admin__body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+/* ---------- 5h Promotions ---------- */
+
+.promo-admin-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 12px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: transparent;
+  text-align: left;
+  color: inherit;
+  width: 100%;
+}
+
+.promo-admin-row[data-selected='true'] {
+  background: var(--accent-soft);
+}
+
+.promo-admin-row__thumb {
+  width: 120px;
+  height: 68px;
+  border-radius: 9px;
+  flex: none;
+  background-image: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.04) 0 2px, transparent 2px 9px);
+  object-fit: cover;
+}
+
+.cover-ph {
+  height: 150px;
+  border-radius: 12px;
+  background-image: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.04) 0 2px, transparent 2px 10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #4e6278;
+  object-fit: cover;
+  width: 100%;
+}
+
+/* ---------- 5i Reconciliation ---------- */
+
+.recon-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.recon-kpi {
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recon-kpi__v {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 38px;
+  line-height: 1;
+}
+
+@media (max-width: 1500px) {
+  .kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1280px) {
+  .admin-split,
+  .rooms-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-split__aside {
+    border-left: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .split-2,
+  .recon-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

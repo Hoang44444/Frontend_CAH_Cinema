@@ -1,0 +1,90 @@
+/* Design tokens taken verbatim from the Figma bundle (CAH Cinema đặt vé phim). */
+
+:root {
+  /* Brand */
+  --accent: #d9481c;
+  --accent-ink: #141110;
+  --accent-soft: #fbede6;
+  --accent-link: #b23a14;
+  --accent-link-hover: #7e2a0e;
+
+  /* Surfaces */
+  --page: #dcd5ca;
+  --screen: #f7f3ed;
+  --surface: #ffffff;
+  --surface-muted: #f7f3ed;
+  --surface-sunken: #efe9e0;
+  --surface-alt: #fbf8f3;
+  --surface-disabled: #e3dbcf;
+  --surface-image: #ede5d9;
+
+  /* Lines */
+  --line: #e6dfd4;
+  --line-strong: #d6ccbe;
+  --line-soft: #e3dbcf;
+
+  /* Ink */
+  --ink: #1a1614;
+  --ink-2: #2e2925;
+  --ink-3: #4a433e;
+  --ink-4: #6e645b;
+  --ink-5: #7a7066;
+  --ink-6: #9a9086;
+  --ink-7: #b5aa9c;
+
+  /* Status */
+  --ok: #1f9d5c;
+  --ok-deep: #0b2617;
+  --warn: #d98a1f;
+  --danger: #e5484d;
+  --danger-ink: #c9302c;
+  --danger-line: #e9b5b3;
+  --danger-soft: #fbe3e2;
+  --danger-deep: #8e1f22;
+  --info: #9fd3ff;
+  --info-deep: #0b1f2e;
+  --notice-bg: #fbf0d9;
+  --notice-line: #e7c77a;
+  --notice-ink: #6a4a0f;
+
+  /* Seat / member tiers */
+  --seat-normal: #9a9086;
+  --seat-vip: #c99a2e;
+  --seat-couple: #d4507f;
+  --rank-silver: #d6ccbe;
+  --rank-gold: #c99a2e;
+  --rank-diamond: #9fd3ff;
+
+  /* Age ratings */
+  --rate-p: #2f9e5b;
+  --rate-k: #2f7fd6;
+  --rate-t13: #d98a1f;
+  --rate-t16: #e06a2b;
+  --rate-t18: #e5484d;
+
+  /* Typography */
+  --font-body: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  --font-display: 'Big Shoulders Display', 'Be Vietnam Pro', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Radii */
+  --r-sm: 5px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 16px;
+  --r-2xl: 20px;
+  --r-3xl: 22px;
+  --r-pill: 999px;
+
+  /* Chrome */
+  --header-h: 72px;
+  --gutter: 56px;
+  --shadow-screen: 0 30px 70px rgba(60, 40, 20, 0.18);
+  --shadow-card: 0 12px 30px rgba(60, 40, 20, 0.08);
+  --shadow-modal: 0 30px 80px rgba(0, 0, 0, 0.25);
+
+  /* Decorative hatch used on hero / poster / food placeholders */
+  --hatch-135: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.035) 0 2px, transparent 2px 12px);
+  --hatch-45: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.04) 0 2px, transparent 2px 12px);
+  --held-hatch: repeating-linear-gradient(45deg, #d6ccbe 0 3px, #f7f3ed 3px 6px);
+}
