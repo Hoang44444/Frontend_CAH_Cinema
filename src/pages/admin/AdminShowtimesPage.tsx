@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { cinemaApi, movieApi, showtimeApi } from '@/api/endpoints';
-import type { MovieFormat, ShowtimeDetailDTO } from '@/api/types';
+import type { MovieFormat, ShowtimeDetailDTO, ShowtimeStatus } from '@/api/types';
 import { AdminTopbar } from '@/components/layout/RoleShells';
 import { Button, EmptyState, ErrorState, Field, Input, Loading, Modal } from '@/components/ui';
 import { addDays, dowDateLong, hhmm, isoDate, parseLocal, startOfToday, vnd } from '@/lib/format';
@@ -14,6 +14,7 @@ const HOURS = 15;
 const TOTAL_MINUTES = HOURS * 60;
 
 const FORMATS: MovieFormat[] = ['2D', '3D', 'IMAX'];
+const STATUSES: ShowtimeStatus[] = ['AVAILABLE', 'SOLD_OUT', 'HIDDEN', 'CANCELLED'];
 
 /** Colour a lane block by its showtime status. */
 function blockStyle(status: string) {
@@ -459,11 +460,19 @@ export default function AdminShowtimesPage() {
             </Field>
 
             <Field label="Trạng thái">
-              <Input
-                small
+              <select
+                className="input input--sm"
                 value={editing.status}
-                onChange={(event) => setEditing({ ...editing, status: event.target.value })}
-              />
+                onChange={(event) =>
+                  setEditing({ ...editing, status: event.target.value as ShowtimeStatus })
+                }
+              >
+                {STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
             </Field>
 
             <span className="note">

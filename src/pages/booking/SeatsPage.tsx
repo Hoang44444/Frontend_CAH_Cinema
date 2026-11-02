@@ -111,29 +111,21 @@ export default function SeatsPage() {
     }
   }
 
-  const continueToCheckout = useMutation({
-    mutationFn: async () => {
-      // Final guard: confirms every seat is still held by this user.
-      await seatApi.preLock(
-        showtimeId,
-        selected.map((seat) => seat.seatId),
-      );
-    },
-    onSuccess: () => {
-      bookingDraftStore.save({
-        showtimeId,
-        seatIds: selected.map((seat) => seat.seatId),
-        seatNames: selected.map(seatName),
-        estimatedSeatTotal: estimateSeatTotal(context?.basePrice ?? 0, selected),
-        context,
-      });
-      navigate(`/booking/showtimes/${showtimeId}/checkout`);
-    },
-    onError: (error) => {
-      toast.error(error);
-      void seats.refetch();
-    },
-  });
+  // Mỗi ghế đã được lock ngay lúc bấm chọn. /seats/pre-lock là SETNX nên gọi lại
+  // trên chính những ghế mình đang giữ thì luôn trả 400 "ghế đang được người khác
+  // giữ" — nó dành cho việc lock một lô ghế chưa giữ. Quyền giữ ghế được backend
+  // kiểm tra lại khi tạo booking (promoteLocksForCheckout), nên bước này chỉ cần
+  // lưu nháp rồi đi tiếp.
+  function continueToCheckout() {
+    bookingDraftStore.save({
+      showtimeId,
+      seatIds: selected.map((seat) => seat.seatId),
+      seatNames: selected.map(seatName),
+      estimatedSeatTotal: estimateSeatTotal(context?.basePrice ?? 0, selected),
+      context,
+    });
+    navigate(`/booking/showtimes/${showtimeId}/checkout`);
+  }
 
   if (!Number.isFinite(showtimeId)) {
     return (
@@ -162,7 +154,7 @@ export default function SeatsPage() {
               selectedIds={selected.map((seat) => seat.seatId)}
               onToggle={(seat) => void toggle(seat)}
               basePrice={context?.basePrice}
-              disabled={locking || continueToCheckout.isPending}
+              disabled={locking}
             />
           )}
         </div>
@@ -257,8 +249,7 @@ export default function SeatsPage() {
             size="lg"
             block
             disabled={selected.length === 0}
-            loading={continueToCheckout.isPending}
-            onClick={() => continueToCheckout.mutate()}
+            onClick={continueToCheckout}
           >
             Tiếp tục — bắp nước &amp; thanh toán
           </Button>

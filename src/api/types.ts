@@ -50,6 +50,8 @@ export type FoodCategory = 'Combo' | 'Food' | 'Drink';
 export type FoodFulfillmentStatus = 'NOT_APPLICABLE' | 'PENDING' | 'FULFILLED';
 export type SeatTypeName = 'NORMAL' | 'VIP' | 'COUPLE' | 'AISLE';
 export type OccupancyStatus = 'AVAILABLE' | 'LOCKED' | 'SOLD';
+/** Khớp CHECK constraint của cột showtimes.status ở backend. */
+export type ShowtimeStatus = 'AVAILABLE' | 'SOLD_OUT' | 'HIDDEN' | 'CANCELLED';
 export type AgeRating = 'P' | 'K' | 'T13' | 'T16' | 'T18';
 export type UserRole = 'ROLE_USER' | 'ROLE_STAFF' | 'ROLE_ADMIN';
 export type RankLevel = 'SILVER' | 'GOLD' | 'DIAMOND';
@@ -196,7 +198,7 @@ export interface ShowtimeSummaryDTO {
   startTime: string;
   endTime: string;
   basePrice: number;
-  status: string;
+  status: ShowtimeStatus;
   roomName: string;
   cinemaName: string;
 }
@@ -215,7 +217,7 @@ export interface ShowtimeDetailDTO {
   startTime: string;
   endTime: string;
   basePrice: number;
-  status: string;
+  status: ShowtimeStatus;
 }
 
 /** GET /public/showtimes/movies/{movieId}?date= */

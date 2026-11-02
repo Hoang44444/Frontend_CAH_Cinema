@@ -233,7 +233,9 @@ export default function MovieDetailPage() {
                             .slice()
                             .sort((a, b) => a.startTime.localeCompare(b.startTime))
                             .map((show) => {
-                              const bookable = show.status === 'OPEN' || show.status === 'ACTIVE';
+                              // Backend chỉ trả AVAILABLE / SOLD_OUT / HIDDEN / CANCELLED.
+                              const bookable =
+                                show.status === 'AVAILABLE' && new Date(show.startTime) > new Date();
                               return (
                                 <button
                                   key={show.showtimeId}
@@ -262,7 +264,9 @@ export default function MovieDetailPage() {
                                   title={`${hhmm(show.startTime)} – ${hhmm(show.endTime)}`}
                                 >
                                   <span className="time__t">{hhmm(show.startTime)}</span>
-                                  <span className="time__note">{bookable ? '' : show.status}</span>
+                                  <span className="time__note">
+                                    {bookable ? '' : show.status === 'AVAILABLE' ? 'Đã chiếu' : show.status}
+                                  </span>
                                 </button>
                               );
                             })}
