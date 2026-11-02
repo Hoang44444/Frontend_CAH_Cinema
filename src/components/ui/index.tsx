@@ -383,7 +383,8 @@ export function describeError(error: unknown): string {
     return error.message;
   }
   if (error instanceof TypeError) {
-    return 'Không kết nối được tới backend. Kiểm tra backend đã chạy ở http://localhost:8080 chưa.';
+    const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    return `Không kết nối được tới backend. Kiểm tra backend ở ${base} đã chạy chưa.`;
   }
   if (error instanceof Error) return error.message;
   return 'Đã xảy ra lỗi không xác định.';
