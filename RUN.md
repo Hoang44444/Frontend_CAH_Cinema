@@ -314,8 +314,12 @@ Cách khác: tự thêm vài suất ở `/admin/showtimes`.
 
 ## Cách C — Dùng backend test đã deploy
 
-Backend test chạy sẵn ở `https://mhoang26ct.online`, không cần JDK, Docker hay seed.
-CORS của nó mở (`Access-Control-Allow-Origin: *`) nên frontend gọi thẳng được.
+> **Cách này hiện KHÔNG dùng được.** `mhoang26ct.online` đã được trỏ về GitHub Pages
+> (chính trang frontend), không còn là backend. DNS của nó về IP `185.199.x.153`, và
+> GitHub Pages chỉ phục vụ GET/HEAD — mọi POST/PUT/PATCH/DELETE trả `405 Method Not
+> Allowed`, OPTIONS preflight cũng 405. Backend chưa có hostname công khai nào
+> (`api.mhoang26ct.online` vẫn NXDOMAIN). Dùng Cách A hoặc B cho tới khi chủ domain
+> thêm bản ghi DNS cho subdomain `api`.
 
 Trong `.env` của frontend:
 
