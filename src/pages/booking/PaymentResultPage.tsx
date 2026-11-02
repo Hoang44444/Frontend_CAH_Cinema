@@ -5,6 +5,7 @@ import { bookingApi } from '@/api/endpoints';
 import type { BookingStatus } from '@/api/types';
 import { SiteHeader, Stepper } from '@/components/layout/SiteLayout';
 import { Button, EmptyState, ErrorState, Loading } from '@/components/ui';
+import { pendingPaymentStore } from '@/store/pendingPayment';
 import { useToast } from '@/store/toast';
 import './booking.css';
 
@@ -105,14 +106,33 @@ function viewFor(status: BookingStatus | 'LOADING'): View {
   }
 }
 
+/** Reads a plain booking id, or the order id a gateway echoes back ("12_1699…"). */
+function firstBookingId(candidates: Array<string | null | undefined>): number | null {
+  for (const value of candidates) {
+    if (!value) continue;
+    const id = Number(/^(\d+)[_-]/.exec(value)?.[1] ?? value);
+    if (Number.isFinite(id)) return id;
+  }
+  return null;
+}
+
 export default function PaymentResultPage() {
   const { bookingId: param } = useParams();
   const [search] = useSearchParams();
   const navigate = useNavigate();
   const toast = useToast();
 
-  // The gateway return route carries the id in the query string instead.
-  const bookingId = Number(param ?? search.get('bookingId') ?? search.get('orderId'));
+  // The gateway return route has no path param. Stripe comes back with
+  // ?bookingId=, VNPay and MoMo echo their own order id ("12_1699…") as
+  // vnp_TxnRef / orderId, and a gateway whose return URL carries nothing at all
+  // falls through to the marker saved just before the hand-off.
+  const bookingId = useMemo(
+    () =>
+      firstBookingId([param, search.get('bookingId'), search.get('orderId'), search.get('vnp_TxnRef')]) ??
+      pendingPaymentStore.get() ??
+      Number.NaN,
+    [param, search],
+  );
   const [startedAt] = useState(() => Date.now());
   const [givenUp, setGivenUp] = useState(false);
 
@@ -134,6 +154,12 @@ export default function PaymentResultPage() {
       setGivenUp(true);
     }
   }, [booking.data, booking.dataUpdatedAt, startedAt]);
+
+  // Once the status can no longer change on its own, the marker has done its job.
+  useEffect(() => {
+    const status = booking.data?.status;
+    if (status && status !== 'PENDING') pendingPaymentStore.clear();
+  }, [booking.data]);
 
   const view = useMemo(() => viewFor(booking.data?.status ?? 'LOADING'), [booking.data]);
 

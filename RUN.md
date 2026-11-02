@@ -231,6 +231,30 @@ Các key MoMo/VNPay để rỗng vẫn boot được; chỉ là không thanh to�
 Bỏ trống Gmail thì không gửi được OTP → **đăng ký tài khoản mới qua UI sẽ không
 chạy**. Dùng 3 tài khoản ở bước 4 để đăng nhập thay vì đăng ký.
 
+#### Return URL của cổng thanh toán
+
+Bốn biến dưới là **URL của frontend**, không phải backend. Trỏ nhầm vào backend —
+ví dụ `STRIPE_SUCCESS_URL=https://mhoang26ct.online/api/v1/public/stripe/return` —
+thì trả tiền xong trình duyệt dừng lại ở trang text trống của
+`StripePaymentController.returned()` và không bao giờ về tới màn hình kết quả.
+
+Bản deploy (frontend nằm trên GitHub Pages) phải dùng:
+
+```env
+STRIPE_SUCCESS_URL=https://hoang44444.github.io/Frontend_CAH_Cinema/payment/return
+STRIPE_CANCEL_URL=https://hoang44444.github.io/Frontend_CAH_Cinema/payment/return
+MOMO_REDIRECT_URL=https://hoang44444.github.io/Frontend_CAH_Cinema/payment/return
+VNPAY_RETURN_URL=https://hoang44444.github.io/Frontend_CAH_Cinema/payment/return
+```
+
+`StripeSandboxConfig` bắt buộc https nên hai URL Stripe không dùng được với
+`localhost` — chạy local thì cứ để `STRIPE_ENABLED=false`.
+
+Backend tự nối `?bookingId=` vào hai URL Stripe, VNPay/MoMo vốn đã gửi kèm
+`vnp_TxnRef` / `orderId`; cổng nào không gửi gì thì frontend đọc mã booking đã
+lưu trước lúc chuyển cổng. Hai đường dẫn cũ `/booking/vnpay-return` và
+`/booking/momo-return` vẫn còn route nên env cũ không gãy.
+
 ### 6. Chạy backend
 
 Máy đặt giờ Việt Nam thì JVM trả timezone là `Asia/Saigon`, mà image `postgres:15`
