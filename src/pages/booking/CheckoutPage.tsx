@@ -7,6 +7,7 @@ import { SiteHeader, Stepper } from '@/components/layout/SiteLayout';
 import { Button, EmptyState, ErrorState, Loading, Pill } from '@/components/ui';
 import { ddmmyyyy, dowDate, hhmm, vnd } from '@/lib/format';
 import { bookingDraftStore } from '@/store/bookingDraft';
+import { pendingPaymentStore } from '@/store/pendingPayment';
 import { useToast } from '@/store/toast';
 import './booking.css';
 
@@ -129,6 +130,8 @@ export default function CheckoutPage() {
     onSuccess: ({ bookingId, payUrl, handoffError }) => {
       bookingDraftStore.clear();
       if (payUrl) {
+        // Some gateways come back without the booking id, so remember it here.
+        pendingPaymentStore.save(bookingId);
         // Leave the SPA for the gateway's hosted page.
         window.location.href = payUrl;
         return;

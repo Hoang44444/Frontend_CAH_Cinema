@@ -128,6 +128,9 @@ export function App() {
 
       {/* Stripe/VNPay/MoMo send the browser back here after payment */}
       <Route path="/payment/return" element={<PaymentResultPage />} />
+      {/* Backends configured with the older per-gateway return URLs land here. */}
+      <Route path="/booking/vnpay-return" element={<PaymentResultPage />} />
+      <Route path="/booking/momo-return" element={<PaymentResultPage />} />
 
       <Route path="/login" element={<Navigate to="/auth" replace />} />
       <Route path="*" element={<NotFoundPage />} />
