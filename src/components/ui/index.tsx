@@ -378,7 +378,13 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
 
 export function describeError(error: unknown): string {
   if (error instanceof ApiError) {
-    if (error.status === 401) return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+    // Backend trả 401 cho cả phiên hết hạn (TOKEN_EXPIRED / ACCESS_TOKEN_EXPIRED)
+    // lẫn sai email/mật khẩu. Bảo "đăng nhập lại" khi người dùng đang ở ngay form
+    // đăng nhập thì vô nghĩa, nên để nguyên câu của backend cho trường hợp đó.
+    if (error.status === 401) {
+      if (error.code === 'INVALID_CREDENTIALS') return error.message;
+      return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+    }
     if (error.status === 403) return 'Tài khoản của bạn không có quyền thực hiện thao tác này.';
     return error.message;
   }
