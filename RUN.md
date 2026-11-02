@@ -208,8 +208,23 @@ npm run dev
 
 Backend `:8080`, frontend `:5173`.
 
-> **Suất chiếu trong seed đều đã quá hạn.** 2160 suất nằm trong khoảng 09/05–07/06/2026,
-> tức đã qua. Nên 3 màn đặt vé vẫn trống cho tới khi bạn tạo suất mới ở `/admin/showtimes`.
+### 8. Dịch ngày suất chiếu
+
+2160 suất trong seed nằm trong khoảng 09/05–07/06/2026, tức đã qua. Ba màn đặt vé
+sẽ trống cho tới khi có suất trong tương lai. Dịch cả lô lên cho trùng hiện tại
+(đổi `160` theo khoảng cách từ seed tới hôm nay):
+
+```bash
+docker exec cah-postgres psql -U postgres -d cinema_db -c "CREATE TABLE IF NOT EXISTS showtimes_original_times AS SELECT showtime_id, start_time, end_time FROM showtimes; UPDATE showtimes SET start_time = start_time + interval '160 days', end_time = end_time + interval '160 days';"
+```
+
+Bảng `showtimes_original_times` giữ mốc gốc để hoàn tác:
+
+```bash
+docker exec cah-postgres psql -U postgres -d cinema_db -c "UPDATE showtimes s SET start_time = o.start_time, end_time = o.end_time FROM showtimes_original_times o WHERE o.showtime_id = s.showtime_id;"
+```
+
+Cách khác: tự thêm vài suất ở `/admin/showtimes`.
 
 ---
 
