@@ -176,7 +176,7 @@ export const showtimeApi = {
     }),
 
   byCinema: (cinemaId: number, date: string) =>
-    http.get<CinemaShowtimesResponseDTO>(`${V1}/public/showtimes/cinemas/${cinemaId}`, {
+    http.get<CinemaShowtimesResponseDTO[]>(`${V1}/public/showtimes/cinemas/${cinemaId}`, {
       query: { date },
       auth: false,
     }),

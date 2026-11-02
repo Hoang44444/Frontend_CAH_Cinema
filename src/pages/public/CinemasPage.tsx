@@ -85,13 +85,13 @@ export default function CinemasPage() {
           <Loading label="Đang tải lịch chiếu…" inline />
         ) : schedule.isError ? (
           <ErrorState error={schedule.error} onRetry={() => void schedule.refetch()} />
-        ) : (schedule.data?.movies?.length ?? 0) === 0 ? (
+        ) : (schedule.data?.length ?? 0) === 0 ? (
           <EmptyState
             title="Không có suất chiếu"
             description={`Rạp này chưa có suất nào vào ngày ${ddmm(date)}.`}
           />
         ) : (
-          schedule.data?.movies.map((entry) => (
+          schedule.data?.map((entry) => (
             <div className="cinema-movie" key={entry.movie.movieId}>
               {entry.movie.posterUrl ? (
                 <img

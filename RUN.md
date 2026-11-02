@@ -131,6 +131,66 @@ Sau bước này:
 
 > Đây là tài khoản demo cho môi trường local. Đổi mật khẩu trước khi deploy.
 
+### 4b. Thêm tài khoản demo cho từng vai trò và từng hạng
+
+Ba tài khoản trên đủ để xem hết màn hình, nhưng muốn đối chiếu nhiều vai trò cùng
+lúc (hoặc xem màn thành viên ở các hạng khác nhau) thì nạp thêm bộ này. Tất cả
+dùng chung mật khẩu với ba tài khoản ở bước 4.
+
+`total_paid` được chọn cho khớp hạng, vì backend tính điểm = `total_paid / 40000`
+rồi xếp hạng GOLD từ 501 điểm và DIAMOND từ 1501 điểm.
+
+```bash
+docker exec -i cah-postgres psql -U postgres -d cinema_db <<'SQL'
+WITH demo(user_id, name, email, phone, total_paid, total_point, rank_level, role_name) AS (
+  VALUES
+    (9990, 'Admin Một',     'admin1@cah.com',  '0900000001',        0::numeric,    0, 'SILVER',  'ROLE_ADMIN'),
+    (9991, 'Admin Hai',     'admin2@cah.com',  '0900000002',        0::numeric,    0, 'SILVER',  'ROLE_ADMIN'),
+    (9992, 'Nhân Viên Một', 'staff1@cah.com',  '0900000003',        0::numeric,    0, 'SILVER',  'ROLE_STAFF'),
+    (9993, 'Nhân Viên Hai', 'staff2@cah.com',  '0900000004',        0::numeric,    0, 'SILVER',  'ROLE_STAFF'),
+    (9994, 'Khách Silver',  'silver@cah.com',  '0900000005',  4000000::numeric,  100, 'SILVER',  'ROLE_USER'),
+    (9995, 'Khách Gold',    'gold@cah.com',    '0900000006', 24000000::numeric,  600, 'GOLD',    'ROLE_USER'),
+    (9996, 'Khách Diamond', 'diamond@cah.com', '0900000007', 64000000::numeric, 1600, 'DIAMOND', 'ROLE_USER')
+)
+INSERT INTO users (user_id, name, email, phone, password, auth_provider, account_type,
+                   total_paid, total_point, rank_level)
+SELECT d.user_id, d.name, d.email, d.phone,
+       '$2a$10$ohR8Z9eOdZWMNe4ecBUOKuObz/EVddz6V7G0EvMl6JR8YV4KRTslG',
+       'EMAIL', 'REGISTERED', d.total_paid, d.total_point, d.rank_level
+FROM demo d
+ON CONFLICT (user_id) DO UPDATE
+SET name = EXCLUDED.name, email = EXCLUDED.email, phone = EXCLUDED.phone,
+    password = EXCLUDED.password, total_paid = EXCLUDED.total_paid,
+    total_point = EXCLUDED.total_point, rank_level = EXCLUDED.rank_level,
+    is_deleted = false;
+
+INSERT INTO user_roles (user_id, role_id)
+SELECT d.user_id, r.role_id
+FROM (VALUES
+    (9990, 'ROLE_ADMIN'), (9991, 'ROLE_ADMIN'),
+    (9992, 'ROLE_STAFF'), (9993, 'ROLE_STAFF'),
+    (9994, 'ROLE_USER'),  (9995, 'ROLE_USER'), (9996, 'ROLE_USER')
+) AS d(user_id, role_name)
+JOIN roles r ON r.role_name = d.role_name
+ON CONFLICT DO NOTHING;
+SQL
+```
+
+| Email | Role | Hạng | Dùng để |
+| --- | --- | --- | --- |
+| `admin1@cah.com` | ROLE_ADMIN | SILVER | toàn quyền, kể cả `/staff` |
+| `admin2@cah.com` | ROLE_ADMIN | SILVER | tài khoản admin thứ hai |
+| `staff1@cah.com` | ROLE_STAFF | SILVER | chỉ `/staff`, vào `/admin` là bị chặn |
+| `staff2@cah.com` | ROLE_STAFF | SILVER | nhân viên thứ hai |
+| `silver@cah.com` | ROLE_USER | SILVER | khách thường, không giảm theo hạng |
+| `gold@cah.com` | ROLE_USER | GOLD | khách giảm 3% theo hạng |
+| `diamond@cah.com` | ROLE_USER | DIAMOND | khách giảm 5% theo hạng |
+
+Bảng `users` **không có unique constraint trên `email`** — backend chặn trùng ở tầng
+code. Dùng lại đúng `user_id` 9990–9996 khi chạy lại để tránh tạo bản sao.
+
+Chạy lại lệnh trên bất cứ lúc nào cũng được: `ON CONFLICT` sẽ cập nhật thay vì lỗi.
+
 ### 5. File `.env` của backend
 
 Tạo `Backend_CAH_Cinema/.env`. **Thiếu key nào trong đám dưới là app chết lúc khởi

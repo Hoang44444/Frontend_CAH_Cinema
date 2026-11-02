@@ -83,7 +83,7 @@ export default function CounterPage() {
         status: string;
       }
     >();
-    for (const entry of schedule.data?.movies ?? []) {
+    for (const entry of schedule.data ?? []) {
       for (const show of entry.showtimes) {
         if (byId.has(show.showtimeId)) continue;
         byId.set(show.showtimeId, {

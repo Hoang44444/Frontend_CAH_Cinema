@@ -244,28 +244,25 @@ export interface MovieShowtimesResponseDTO {
 }
 
 /** GET /public/showtimes/cinemas/{cinemaId}?date= */
+/**
+ * Một phần tử của GET /public/showtimes/cinemas/{id}. Endpoint trả thẳng một
+ * mảng các nhóm theo phim, không bọc trong object nào.
+ */
 export interface CinemaShowtimesResponseDTO {
-  cinema?: {
-    cinemaId: number;
-    name: string;
-    address: string | null;
+  movie: {
+    movieId: number;
+    title: string;
+    posterUrl: string | null;
+    ageRating: string | null;
   };
-  movies: Array<{
-    movie: {
-      movieId: number;
-      title: string;
-      posterUrl: string | null;
-      ageRating: string | null;
-    };
-    showtimes: Array<{
-      showtimeId: number;
-      startTime: string;
-      endTime: string;
-      format: string;
-      basePrice: number;
-      status: string;
-      roomName: string;
-    }>;
+  showtimes: Array<{
+    showtimeId: number;
+    startTime: string;
+    endTime: string;
+    format: string;
+    basePrice: number;
+    status: ShowtimeStatus;
+    roomName: string;
   }>;
 }
 
