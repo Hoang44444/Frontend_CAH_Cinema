@@ -17,7 +17,7 @@ import './booking.css';
  * GET /bookings/{id} until the status settles while displaying all gateway
  * and ticket details.
  */
-const POLL_MS = 2500;
+const POLL_MS = 1200;
 const POLL_TIMEOUT_MS = 90_000;
 
 const VNPAY_CODES: Record<string, string> = {
@@ -101,6 +101,7 @@ function heroFor(
   status: BookingStatus | 'LOADING',
   gatewayFailed: boolean,
   gatewayReason: string | null,
+  gatewaySuccess: boolean = false,
 ): HeroView {
   if (gatewayFailed && status === 'PENDING') {
     return {
@@ -112,6 +113,18 @@ function heroFor(
       color: 'var(--danger)',
       bgColor: 'var(--danger-soft)',
       statusLabel: 'FAILED',
+    };
+  }
+
+  // Khi cổng thanh toán đã xác nhận trừ tiền thành công, hiển thị tích cực ngay không để khách chờ IPN
+  if (gatewaySuccess && (status === 'PENDING' || status === 'LOADING')) {
+    return {
+      title: 'Thanh toán thành công',
+      body: 'Giao dịch đã được cổng thanh toán ghi nhận thành công. Hệ thống đang đồng bộ và xuất vé điện tử...',
+      glyph: 'ok',
+      color: 'var(--ok)',
+      bgColor: '#edf8f2',
+      statusLabel: 'PAID',
     };
   }
 
@@ -309,6 +322,10 @@ export default function PaymentResultPage() {
     }
   }, [booking.data?.status]);
 
+  const gatewaySuccess = useMemo(() => {
+    return vnpResponseCode === '00' || momoResultCode === '0' || momoResultCode === '9000';
+  }, [vnpResponseCode, momoResultCode]);
+
   // Hero status view
   const hero = useMemo(
     () =>
@@ -316,8 +333,9 @@ export default function PaymentResultPage() {
         booking.data?.status ?? 'LOADING',
         Boolean(gatewayFailure),
         gatewayFailure?.message ?? null,
+        gatewaySuccess,
       ),
-    [booking.data?.status, gatewayFailure],
+    [booking.data?.status, gatewayFailure, gatewaySuccess],
   );
 
   // Movie & Ticket facts consolidated from invoice + pendingInfo
@@ -391,8 +409,8 @@ export default function PaymentResultPage() {
     );
   }
 
-  const isSuccess = booking.data?.status === 'PAID' || booking.data?.status === 'CHECKED_IN';
-  const isPending = booking.data?.status === 'PENDING' || booking.isLoading;
+  const isSuccess = booking.data?.status === 'PAID' || booking.data?.status === 'CHECKED_IN' || gatewaySuccess;
+  const isPending = !isSuccess && (booking.data?.status === 'PENDING' || booking.isLoading);
 
   return (
     <div className="screen" style={{ display: 'flex', flexDirection: 'column' }}>
