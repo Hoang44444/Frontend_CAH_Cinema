@@ -127,18 +127,46 @@ export const SEAT_TYPE_VI: Record<string, string> = {
 };
 
 /**
- * Estimated seat price for the live subtotal while picking seats:
- * showtime base price x seat type multiplier.
- *
- * The day / time-slot / format multiplier lives in admin-only price configs, so
- * the authoritative total is whatever POST /bookings returns — this is only the
- * "Tạm tính" figure the design shows.
+ * Calculates showtime price multiplier based on format and time slot.
+ * Matches backend PriceConfigService logic and database price_configs.
  */
-export function estimateSeatPrice(basePrice: number, seat: SeatDTO): number {
-  const multiplier = Number(seat.seatType?.priceMultiplier ?? 1);
-  return Math.round(basePrice * multiplier);
+export function getShowtimeMultiplier(format?: string | null, startTime?: string | null): number {
+  let formatMul = 1.0;
+  if (format) {
+    const f = format.toUpperCase();
+    if (f.includes('IMAX')) formatMul = 1.5;
+    else if (f.includes('3D')) formatMul = 1.3;
+    else if (f.includes('2D')) formatMul = 1.0;
+  }
+
+  let timeMul = 1.0;
+  if (startTime) {
+    const d = new Date(startTime);
+    if (!Number.isNaN(d.getTime())) {
+      const day = d.getDay(); // 0 is Sunday, 6 is Saturday
+      if (day === 0 || day === 6) {
+        timeMul = 1.2;
+      } else {
+        const hour = d.getHours();
+        if (hour >= 6 && hour < 12) timeMul = 0.8;
+        else if (hour >= 12 && hour < 18) timeMul = 1.0;
+        else if (hour >= 18) timeMul = 1.2;
+      }
+    }
+  }
+
+  return formatMul * timeMul;
 }
 
-export function estimateSeatTotal(basePrice: number, seats: SeatDTO[]): number {
-  return seats.reduce((sum, seat) => sum + estimateSeatPrice(basePrice, seat), 0);
+/**
+ * Estimated seat price for the live subtotal while picking seats:
+ * showtime base price x seat type multiplier x showtime format/time multiplier.
+ */
+export function estimateSeatPrice(basePrice: number, seat: SeatDTO, showtimeMultiplier: number = 1.0): number {
+  const multiplier = Number(seat.seatType?.priceMultiplier ?? 1);
+  return Math.round(basePrice * multiplier * showtimeMultiplier);
+}
+
+export function estimateSeatTotal(basePrice: number, seats: SeatDTO[], showtimeMultiplier: number = 1.0): number {
+  return seats.reduce((sum, seat) => sum + estimateSeatPrice(basePrice, seat, showtimeMultiplier), 0);
 }

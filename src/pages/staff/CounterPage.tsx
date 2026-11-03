@@ -20,7 +20,7 @@ import {
   describeError,
 } from '@/components/ui';
 import { hhmm, isoDate, startOfToday, vnd } from '@/lib/format';
-import { estimateSeatTotal, seatName } from '@/lib/seatmap';
+import { estimateSeatTotal, getShowtimeMultiplier, seatName } from '@/lib/seatmap';
 import { useToast } from '@/store/toast';
 import './staff.css';
 
@@ -120,7 +120,11 @@ export default function CounterPage() {
     setSelected([]);
   }, [showtimeId]);
 
-  const seatTotal = estimateSeatTotal(current?.basePrice ?? 0, selected);
+  const showtimeMultiplier = useMemo(
+    () => getShowtimeMultiplier(current?.format, current?.startTime),
+    [current?.format, current?.startTime],
+  );
+  const seatTotal = estimateSeatTotal(current?.basePrice ?? 0, selected, showtimeMultiplier);
   const foodTotal = (foods.data ?? []).reduce(
     (sum, food) => sum + Number(food.price) * (quantities[food.foodId] ?? 0),
     0,

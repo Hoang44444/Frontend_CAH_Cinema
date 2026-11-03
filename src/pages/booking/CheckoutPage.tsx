@@ -6,6 +6,7 @@ import type { BookingPaymentMethod, VoucherResponseDTO } from '@/api/types';
 import { SiteHeader, Stepper } from '@/components/layout/SiteLayout';
 import { Button, EmptyState, ErrorState, Loading, Pill } from '@/components/ui';
 import { ddmmyyyy, dowDate, hhmm, vnd } from '@/lib/format';
+import { useAuth } from '@/store/auth';
 import { bookingDraftStore } from '@/store/bookingDraft';
 import { pendingPaymentStore } from '@/store/pendingPayment';
 import { useToast } from '@/store/toast';
@@ -46,6 +47,7 @@ export default function CheckoutPage() {
   const showtimeId = Number(param);
   const navigate = useNavigate();
   const toast = useToast();
+  const { user } = useAuth();
 
   const draft = useMemo(() => bookingDraftStore.getFor(showtimeId), [showtimeId]);
 
@@ -67,10 +69,27 @@ export default function CheckoutPage() {
     );
   }, [foods.data, quantities]);
 
-  const orderTotal = seatTotal + foodTotal;
+  // Rank discount matching UserRank.java (SILVER 2%, GOLD 3%, DIAMOND 5%)
+  const rankDiscountRate = useMemo(() => {
+    switch (user?.rankLevel) {
+      case 'DIAMOND':
+        return 0.05;
+      case 'GOLD':
+        return 0.03;
+      case 'SILVER':
+        return 0.02;
+      default:
+        return 0;
+    }
+  }, [user?.rankLevel]);
+
+  const grossTotal = seatTotal + foodTotal;
+  const rankDiscount = Math.round(grossTotal * rankDiscountRate);
+  const subtotalAfterRank = Math.max(0, grossTotal - rankDiscount);
+
   const selectedVoucher = vouchers.data?.find((voucher) => voucher.voucherId === voucherId) ?? null;
-  const voucherDiscount = previewVoucherDiscount(selectedVoucher, orderTotal);
-  const estimatedGrand = Math.max(0, orderTotal - voucherDiscount);
+  const voucherDiscount = previewVoucherDiscount(selectedVoucher, subtotalAfterRank);
+  const estimatedGrand = Math.max(0, subtotalAfterRank - voucherDiscount);
 
   const visibleFoods = (foods.data ?? []).filter(
     (food) => category === 'Tất cả' || food.category === category,
@@ -112,22 +131,23 @@ export default function CheckoutPage() {
       try {
         if (method === 'STRIPE') {
           const checkout = await bookingApi.stripePay(booking.bookingId);
-          return { bookingId: booking.bookingId, payUrl: checkout.payUrl };
+          return { bookingId: booking.bookingId, payUrl: checkout.payUrl, totalAmount: booking.totalAmount };
         }
         if (method === 'VNPAY') {
           const checkout = await bookingApi.vnpayPay(booking.bookingId, requestId);
-          return { bookingId: booking.bookingId, payUrl: checkout.payUrl };
+          return { bookingId: booking.bookingId, payUrl: checkout.payUrl, totalAmount: booking.totalAmount };
         }
         const checkout = await bookingApi.momoPay(booking.bookingId, requestId);
         return {
           bookingId: booking.bookingId,
           payUrl: checkout.payUrl ?? checkout.deeplink ?? checkout.qrCodeUrl ?? null,
+          totalAmount: booking.totalAmount,
         };
       } catch (error) {
-        return { bookingId: booking.bookingId, payUrl: null, handoffError: error };
+        return { bookingId: booking.bookingId, payUrl: null, handoffError: error, totalAmount: booking.totalAmount };
       }
     },
-    onSuccess: ({ bookingId, payUrl, handoffError }) => {
+    onSuccess: ({ bookingId, payUrl, handoffError, totalAmount }) => {
       const metadata = {
         movieTitle: draft?.context?.movieTitle,
         moviePosterUrl: draft?.context?.moviePosterUrl,
@@ -136,7 +156,7 @@ export default function CheckoutPage() {
         format: draft?.context?.format,
         startTime: draft?.context?.startTime,
         seatNames: draft?.seatNames,
-        totalAmount: estimatedGrand,
+        totalAmount: totalAmount ?? estimatedGrand,
         paymentMethod: method,
       };
       pendingPaymentStore.save(bookingId, metadata);
@@ -263,7 +283,7 @@ export default function CheckoutPage() {
             ) : (
               <div className="voucher-grid">
                 {vouchers.data?.map((voucher) => {
-                  const usable = isUsable(voucher, orderTotal);
+                  const usable = isUsable(voucher, subtotalAfterRank);
                   const picked = voucherId === voucher.voucherId;
                   return (
                     <button
@@ -343,20 +363,32 @@ export default function CheckoutPage() {
               <span style={{ color: 'var(--ink-4)' }}>Vé · {draft.seatNames.join(', ')}</span>
               <span>{vnd(seatTotal)}</span>
             </div>
-            <div className="summary__line">
-              <span style={{ color: 'var(--ink-4)' }}>Bắp nước</span>
-              <span>{vnd(foodTotal)}</span>
-            </div>
+            {foodTotal > 0 && (
+              <div className="summary__line">
+                <span style={{ color: 'var(--ink-4)' }}>Bắp nước</span>
+                <span>{vnd(foodTotal)}</span>
+              </div>
+            )}
+            {rankDiscount > 0 && (
+              <div className="summary__line">
+                <span style={{ color: 'var(--ink-4)' }}>
+                  Ưu đãi thành viên ({user?.rankLevel} -{Math.round(rankDiscountRate * 100)}%)
+                </span>
+                <span style={{ color: 'var(--ok)' }}>−{vnd(rankDiscount)}</span>
+              </div>
+            )}
             <div className="summary__line">
               <span style={{ color: 'var(--ink-4)' }}>
                 Voucher {selectedVoucher ? selectedVoucher.code : '(chưa chọn)'}
               </span>
-              <span style={{ color: 'var(--ok)' }}>−{vnd(voucherDiscount)}</span>
+              <span style={{ color: voucherDiscount > 0 ? 'var(--ok)' : undefined }}>
+                {voucherDiscount > 0 ? `−${vnd(voucherDiscount)}` : '0đ'}
+              </span>
             </div>
           </div>
 
           <div className="summary__total">
-            <span style={{ fontSize: 14, color: 'var(--ink-4)' }}>Tạm tính</span>
+            <span style={{ fontSize: 14, color: 'var(--ink-4)' }}>Tổng thanh toán</span>
             <span className="summary__grand">{vnd(estimatedGrand)}</span>
           </div>
 

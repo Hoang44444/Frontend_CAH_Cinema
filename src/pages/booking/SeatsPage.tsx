@@ -7,7 +7,7 @@ import { SeatMap } from '@/components/seat/SeatMap';
 import { SiteHeader, Stepper } from '@/components/layout/SiteLayout';
 import { Button, ErrorState, Loading, PosterBox, RatingBadge } from '@/components/ui';
 import { dowDateLong, hhmm, mmss, vnd } from '@/lib/format';
-import { estimateSeatTotal, seatName } from '@/lib/seatmap';
+import { estimateSeatTotal, getShowtimeMultiplier, seatName } from '@/lib/seatmap';
 import { posterTint } from '@/lib/palette';
 import { bookingDraftStore, showtimeContextStore } from '@/store/bookingDraft';
 import { useToast } from '@/store/toast';
@@ -112,6 +112,11 @@ export default function SeatsPage() {
   }
 
   // Mỗi ghế đã được lock ngay lúc bấm chọn. /seats/pre-lock là SETNX nên gọi lại
+  const showtimeMultiplier = useMemo(
+    () => getShowtimeMultiplier(context?.format, context?.startTime),
+    [context?.format, context?.startTime],
+  );
+
   // trên chính những ghế mình đang giữ thì luôn trả 400 "ghế đang được người khác
   // giữ" — nó dành cho việc lock một lô ghế chưa giữ. Quyền giữ ghế được backend
   // kiểm tra lại khi tạo booking (promoteLocksForCheckout), nên bước này chỉ cần
@@ -121,7 +126,7 @@ export default function SeatsPage() {
       showtimeId,
       seatIds: selected.map((seat) => seat.seatId),
       seatNames: selected.map(seatName),
-      estimatedSeatTotal: estimateSeatTotal(context?.basePrice ?? 0, selected),
+      estimatedSeatTotal: estimateSeatTotal(context?.basePrice ?? 0, selected, showtimeMultiplier),
       context,
     });
     navigate(`/booking/showtimes/${showtimeId}/checkout`);
@@ -136,7 +141,7 @@ export default function SeatsPage() {
     );
   }
 
-  const seatTotal = estimateSeatTotal(context?.basePrice ?? 0, selected);
+  const seatTotal = estimateSeatTotal(context?.basePrice ?? 0, selected, showtimeMultiplier);
 
   return (
     <div className="screen" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -153,7 +158,7 @@ export default function SeatsPage() {
               seats={seats.data}
               selectedIds={selected.map((seat) => seat.seatId)}
               onToggle={(seat) => void toggle(seat)}
-              basePrice={context?.basePrice}
+              basePrice={context?.basePrice ? Math.round(context.basePrice * showtimeMultiplier) : undefined}
               disabled={locking}
             />
           )}
