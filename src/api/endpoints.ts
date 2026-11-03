@@ -7,6 +7,7 @@ import { http, requestRaw } from '@/lib/http';
 import type {
   AuthResponseDTO,
   BookingStatusResponseDTO,
+  TicketItemResponseDTO,
   BusinessOverviewReportDTO,
   CancelBookingRequestDTO,
   CancelBookingResponseDTO,
@@ -224,6 +225,8 @@ export const bookingApi = {
     http.post<CreateBookingResponseDTO>(`${V1}/bookings`, payload),
 
   status: (bookingId: number) => http.get<BookingStatusResponseDTO>(`${V1}/bookings/${bookingId}`),
+
+  tickets: (bookingId: number) => http.get<TicketItemResponseDTO[]>(`${V1}/bookings/${bookingId}/tickets`),
 
   cancellationQuote: (bookingId: number) =>
     http.get<CancellationQuoteDTO>(`${V1}/bookings/${bookingId}/cancellation-quote`),
