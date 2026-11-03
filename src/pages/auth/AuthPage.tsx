@@ -416,23 +416,43 @@ function ForgotForm({ onDone }: { onDone: () => void }) {
       onSubmit={(event) => {
         event.preventDefault();
         if (step === 0) {
-          void run(async () => {
-            await authApi.sendOtp(email.trim());
-            cooldown.start();
-            setStep(1);
-            toast.success('Đã gửi mã OTP tới email của bạn.');
-          });
+          const trimmedEmail = email.trim();
+          if (!trimmedEmail) return;
+          // Chuyển ngay sang bước nhập OTP để người dùng không phải chờ SMTP gửi email
+          setError(null);
+          setStep(1);
+          setOtp('');
+          cooldown.start();
+          toast.show('Đang gửi mã OTP đến email của bạn...');
+          void authApi
+            .sendOtp(trimmedEmail)
+            .then(() => {
+              toast.success('Đã gửi mã OTP tới email của bạn. Vui lòng kiểm tra hộp thư.');
+            })
+            .catch((caught) => {
+              const err = describeError(caught);
+              setError(err);
+              toast.error(err);
+            });
         } else if (step === 1) {
           void run(async () => {
             const result = await authApi.fpVerifyOtp(email.trim(), otp);
-            // Backend returns the reset token that authorises the change.
-            setResetToken(result?.resetToken ?? '');
+            // Backend trả về FP_VerifyOtpResponseOTP chứa trường `token`
+            const token = result?.token || result?.resetToken;
+            if (!token) {
+              throw new Error('Xác thực OTP thất bại hoặc mã OTP không hợp lệ. Vui lòng thử lại.');
+            }
+            setResetToken(token);
             setStep(2);
+            toast.success('Xác thực OTP thành công. Vui lòng thiết lập mật khẩu mới.');
           });
         } else {
           void run(async () => {
+            if (!resetToken) {
+              throw new Error('Không tìm thấy mã xác thực (reset token). Vui lòng thực hiện lại từ bước 1.');
+            }
             await authApi.fpChangePassword(email.trim(), password, resetToken);
-            toast.success('Đổi mật khẩu thành công. Hãy đăng nhập lại.');
+            toast.success('Đổi mật khẩu thành công! Hãy đăng nhập lại.');
             onDone();
           });
         }
@@ -463,7 +483,7 @@ function ForgotForm({ onDone }: { onDone: () => void }) {
               placeholder="you@example.com"
             />
           </Field>
-          <Button type="submit" size="md" block style={{ height: 54 }} loading={busy}>
+          <Button type="submit" size="md" block style={{ height: 54 }}>
             Gửi mã OTP
           </Button>
         </>
@@ -472,6 +492,28 @@ function ForgotForm({ onDone }: { onDone: () => void }) {
       {step === 1 && (
         <>
           <h1 className="auth__title">Nhập mã OTP</h1>
+          <p style={{ fontSize: 13.5, color: 'var(--ink-4)', margin: '-6px 0 10px' }}>
+            Mã OTP 6 số đang được gửi tới: <strong style={{ color: 'var(--ink)' }}>{email}</strong>{' '}
+            <button
+              type="button"
+              onClick={() => {
+                setStep(0);
+                setOtp('');
+                setError(null);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--accent)',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontSize: 13,
+                marginLeft: 4,
+              }}
+            >
+              (Đổi email)
+            </button>
+          </p>
           <Field
             label={cooldown.left > 0 ? `Mã OTP · gửi lại sau ${mmss(cooldown.left)}` : 'Mã OTP 6 số'}
             error={error}
@@ -485,16 +527,22 @@ function ForgotForm({ onDone }: { onDone: () => void }) {
             type="button"
             variant="ghost"
             size="xs"
-            disabled={cooldown.left > 0}
-            onClick={() =>
-              void run(async () => {
-                await authApi.sendOtp(email.trim());
-                cooldown.start();
-                toast.success('Đã gửi lại mã OTP.');
-              })
-            }
+            disabled={cooldown.left > 0 || busy}
+            onClick={() => {
+              cooldown.start();
+              setError(null);
+              toast.show('Đang gửi lại mã OTP...');
+              void authApi
+                .sendOtp(email.trim())
+                .then(() => toast.success('Đã gửi lại mã OTP thành công.'))
+                .catch((caught) => {
+                  const err = describeError(caught);
+                  setError(err);
+                  toast.error(err);
+                });
+            }}
           >
-            {cooldown.left > 0 ? `Gửi lại sau ${mmss(cooldown.left)}` : 'Gửi lại mã'}
+            {cooldown.left > 0 ? `Gửi lại sau ${mmss(cooldown.left)}` : 'Gửi lại mã OTP'}
           </Button>
         </>
       )}

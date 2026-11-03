@@ -78,7 +78,8 @@ export interface AuthResponseDTO {
 }
 
 export interface FpVerifyOtpResponse {
-  resetToken: string;
+  token?: string;
+  resetToken?: string;
 }
 
 export interface InvoiceSeat {
