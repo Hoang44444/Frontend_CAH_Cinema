@@ -28,7 +28,9 @@ jobs:
 
       - run: npm ci
 
-      # Đọc .env.production: base path /Frontend_CAH_Cinema/ và API https://mhoang26ct.online
+      - run: npm test
+
+      # Đọc .env.production: base path / và API https://cinema.mhoang26ct.online
       # postbuild copy index.html -> 404.html để GitHub Pages trả đúng SPA khi vào thẳng route.
       - run: npm run build
 

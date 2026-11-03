@@ -127,7 +127,9 @@ export function App() {
       </Route>
 
       {/* Stripe/VNPay/MoMo send the browser back here after payment */}
+      <Route path="/payment/result" element={<PaymentResultPage />} />
       <Route path="/payment/return" element={<PaymentResultPage />} />
+      <Route path="/booking/result" element={<PaymentResultPage />} />
       {/* Backends configured with the older per-gateway return URLs land here. */}
       <Route path="/booking/vnpay-return" element={<PaymentResultPage />} />
       <Route path="/booking/momo-return" element={<PaymentResultPage />} />

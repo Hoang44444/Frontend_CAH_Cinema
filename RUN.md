@@ -234,7 +234,7 @@ chạy**. Dùng 3 tài khoản ở bước 4 để đăng nhập thay vì đăng
 #### Return URL của cổng thanh toán
 
 Bốn biến dưới là **URL của frontend**, không phải backend. Trỏ nhầm vào backend —
-ví dụ `STRIPE_SUCCESS_URL=https://mhoang26ct.online/api/v1/public/stripe/return` —
+ví dụ `STRIPE_SUCCESS_URL=https://cinema.mhoang26ct.online/api/v1/public/stripe/return` —
 thì trả tiền xong trình duyệt dừng lại ở trang text trống của
 `StripePaymentController.returned()` và không bao giờ về tới màn hình kết quả.
 
@@ -314,18 +314,14 @@ Cách khác: tự thêm vài suất ở `/admin/showtimes`.
 
 ## Cách C — Dùng backend test đã deploy
 
-> **Cách này hiện KHÔNG dùng được.** `mhoang26ct.online` đã được trỏ về GitHub Pages
-> (chính trang frontend), không còn là backend. DNS của nó về IP `185.199.x.153`, và
-> GitHub Pages chỉ phục vụ GET/HEAD — mọi POST/PUT/PATCH/DELETE trả `405 Method Not
-> Allowed`, OPTIONS preflight cũng 405. Backend chưa có hostname công khai nào
-> (`api.mhoang26ct.online` vẫn NXDOMAIN). Dùng Cách A hoặc B cho tới khi chủ domain
-> thêm bản ghi DNS cho subdomain `api`.
+> Backend đã deploy nằm tại subdomain `cinema.mhoang26ct.online`.
+> (Domain gốc `mhoang26ct.online` là GitHub Pages frontend).
 
 Trong `.env` của frontend:
 
 ```env
-VITE_API_BASE_URL=https://mhoang26ct.online
-VITE_PROXY_TARGET=https://mhoang26ct.online
+VITE_API_BASE_URL=https://cinema.mhoang26ct.online
+VITE_PROXY_TARGET=https://cinema.mhoang26ct.online
 ```
 
 ```bash

@@ -128,16 +128,26 @@ export default function CheckoutPage() {
       }
     },
     onSuccess: ({ bookingId, payUrl, handoffError }) => {
+      const metadata = {
+        movieTitle: draft?.context?.movieTitle,
+        moviePosterUrl: draft?.context?.moviePosterUrl,
+        cinemaName: draft?.context?.cinemaName,
+        roomName: draft?.context?.roomName,
+        format: draft?.context?.format,
+        startTime: draft?.context?.startTime,
+        seatNames: draft?.seatNames,
+        totalAmount: estimatedGrand,
+        paymentMethod: method,
+      };
+      pendingPaymentStore.save(bookingId, metadata);
       bookingDraftStore.clear();
       if (payUrl) {
-        // Some gateways come back without the booking id, so remember it here.
-        pendingPaymentStore.save(bookingId);
         // Leave the SPA for the gateway's hosted page.
         window.location.href = payUrl;
         return;
       }
       if (handoffError) toast.error(handoffError);
-      navigate(`/booking/${bookingId}/result`, { replace: true });
+      navigate(`/payment/result?bookingId=${bookingId}`, { replace: true });
     },
     onError: (error) => toast.error(error),
   });
