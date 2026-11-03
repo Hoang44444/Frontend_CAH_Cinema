@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { QRCodeSVG } from 'qrcode.react';
 import { bookingApi, userApi } from '@/api/endpoints';
 import type { BookingStatus, InvoiceSeat } from '@/api/types';
 import { SiteHeader, Stepper } from '@/components/layout/SiteLayout';
@@ -350,6 +351,7 @@ export default function PaymentResultPage() {
     [invoice?.seats, pendingInfo?.seatNames],
   );
   const foods = invoice?.foods ?? [];
+  const tickets = booking.data?.tickets ?? [];
   const totalAmount =
     invoice?.totalPrice ??
     vnpAmount ??
@@ -639,6 +641,60 @@ export default function PaymentResultPage() {
                       </span>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Ticket QR codes are issued by the backend only after payment is confirmed. */}
+              {isSuccess && tickets.length > 0 && (
+                <div className="result-ticket-codes" aria-label="Mã QR vé điện tử">
+                  {tickets.map((ticket) => {
+                    const qrValue = ticket.qrCode || ticket.checkinCode;
+                    if (!qrValue) return null;
+                    return (
+                      <div
+                        key={ticket.ticketId}
+                        className="result-ticket-code"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 16,
+                          padding: 14,
+                          border: '1px solid var(--line)',
+                          borderRadius: 12,
+                          background: '#fff',
+                          breakInside: 'avoid',
+                        }}
+                      >
+                        <QRCodeSVG
+                          value={qrValue}
+                          size={168}
+                          level="L"
+                          marginSize={4}
+                          minVersion={1}
+                          title={`QR vé ${ticket.seatName}`}
+                          style={{ flexShrink: 0 }}
+                        />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
+                          <strong>Vé ghế {ticket.seatName}</strong>
+                          <span style={{ color: 'var(--ink-4)', fontSize: 13 }}>Mã soát vé</span>
+                          <code
+                            style={{
+                              fontSize: 16,
+                              fontWeight: 700,
+                              letterSpacing: '0.08em',
+                              overflowWrap: 'anywhere',
+                              color: 'var(--ink)',
+                            }}
+                          >
+                            {ticket.checkinCode || qrValue}
+                          </code>
+                          {ticket.isCheckedIn && (
+                            <span style={{ color: 'var(--ok)', fontSize: 12 }}>Đã sử dụng</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 

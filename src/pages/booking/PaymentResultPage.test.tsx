@@ -99,6 +99,35 @@ describe('PaymentResultPage (Màn hình kết quả thanh toán)', () => {
     expect(screen.getByText('Về trang chủ')).toBeInTheDocument();
   });
 
+  it('hiển thị QR và mã soát vé do backend trả về khi booking đã thanh toán', async () => {
+    vi.mocked(bookingApi.status).mockResolvedValue({
+      bookingId: 42,
+      status: 'PAID',
+      tickets: [
+        {
+          ticketId: 94,
+          bookingId: 42,
+          showtimeId: 10,
+          seatId: 1,
+          seatName: 'F07',
+          price: 90000,
+          checkinCode: 'TK-2B07-C9C4',
+          qrCode: 'TK-2B07-C9C4',
+          status: 'VALID',
+          isCheckedIn: false,
+        },
+      ],
+    });
+
+    renderWithProviders(<PaymentResultPage />, {
+      initialEntries: ['/payment/result?bookingId=42'],
+    });
+
+    expect(await screen.findByText('TK-2B07-C9C4')).toBeInTheDocument();
+    expect(screen.getByTitle('QR vé F07')).toBeInTheDocument();
+    expect(screen.getByText('Vé ghế F07')).toBeInTheDocument();
+  });
+
   it('hiển thị thành công khi callback từ VNPay với vnp_ResponseCode=00', async () => {
     renderWithProviders(<PaymentResultPage />, {
       initialEntries: [
