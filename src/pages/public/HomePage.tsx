@@ -188,7 +188,7 @@ export default function HomePage() {
           ) : (
             <EmptyState
               title="Chưa có phim nào"
-              description="Backend chưa trả về phim đang chiếu. Thêm phim trong trang Quản trị → Phim."
+              description="Hiện chưa có phim đang chiếu. Vui lòng quay lại sau."
             />
           )}
         </div>

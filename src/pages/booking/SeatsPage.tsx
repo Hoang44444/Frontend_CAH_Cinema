@@ -245,8 +245,7 @@ export default function SeatsPage() {
 
           {!context && (
             <span className="note">
-              Mở trang này trực tiếp nên chưa có thông tin suất. Giá hiển thị là 0đ; tổng tiền chính thức do
-              backend trả về ở bước thanh toán.
+              Chưa có thông tin suất chiếu. Vui lòng quay lại chọn suất để xem giá vé chính xác.
             </span>
           )}
 

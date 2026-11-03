@@ -144,7 +144,7 @@ export default function MyTicketsPage() {
         {invoices.length === 0 ? (
           <EmptyState
             title="Chưa có booking nào"
-            description="Khi bạn đặt vé, booking sẽ xuất hiện ở đây. /users/me trả về 5 booking gần nhất."
+            description="Thông tin vé sẽ xuất hiện tại đây sau khi bạn đặt vé."
           />
         ) : visible.length === 0 ? (
           <EmptyState title="Không có booking phù hợp" description="Thử chọn bộ lọc khác." />
@@ -184,9 +184,6 @@ export default function MyTicketsPage() {
           ))
         )}
 
-        <span className="note">
-          Danh sách này là 5 booking gần nhất do <span className="mono">GET /api/v1/users/me</span> trả về.
-        </span>
       </div>
 
       {/* ---- Ticket detail ---- */}
@@ -249,7 +246,7 @@ export default function MyTicketsPage() {
             <div className="row-between" style={{ paddingTop: 16, borderTop: '1px solid var(--line)', gap: 12 }}>
               <span style={{ fontSize: 13, color: 'var(--ink-4)', textWrap: 'pretty' }}>
                 {selected.bookingStatus === 'PAID'
-                  ? 'Hủy được tới 2 giờ trước giờ chiếu. Tỷ lệ hoàn do backend tính lại khi bạn xem báo giá.'
+                  ? 'Bạn có thể xem số tiền được hoàn trước khi xác nhận hủy vé.'
                   : `Trạng thái hiện tại: ${selected.bookingStatus}.`}
               </span>
               {selected.bookingStatus === 'PAID' && (
@@ -327,7 +324,7 @@ export default function MyTicketsPage() {
             )}
             <span style={{ fontWeight: 700, fontSize: 14 }}>Đưa mã QR hoặc mã soát vé cho nhân viên</span>
             <span style={{ fontSize: 12, color: 'var(--ink-4)' }}>
-              Booking có nhiều ghế sẽ hiển thị một mã riêng cho từng vé. Mỗi mã chỉ quét được một lần.
+              Xuất trình mã QR hoặc đọc mã soát vé khi vào rạp.
             </span>
           </div>
         </div>

@@ -152,7 +152,7 @@ function heroFor(
     case 'LOADING':
       return {
         title: 'Đang xác nhận thanh toán',
-        body: 'Hệ thống đang chờ cổng thanh toán xác thực giao dịch qua IPN. Vé sẽ xuất hiện ngay khi hoàn tất — vui lòng không thanh toán lại.',
+        body: 'Thanh toán của bạn đang được xác nhận. Vé sẽ xuất hiện ngay khi giao dịch hoàn tất — vui lòng không thanh toán lại.',
         glyph: 'spin',
         color: 'var(--accent)',
         bgColor: 'var(--accent-soft)',
@@ -492,7 +492,7 @@ export default function PaymentResultPage() {
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
                 <div>
-                  Vẫn chưa nhận được xác nhận IPN sau 90 giây. Thanh toán có thể đang được xử lý chậm bởi ngân hàng — vui lòng kiểm tra lại trong <strong>Vé của tôi</strong> sau vài phút, đừng thanh toán lại.
+                  Giao dịch của bạn đang được ngân hàng xử lý. Vui lòng kiểm tra lại trong <strong>Vé của tôi</strong> sau vài phút và đừng thanh toán lại.
                 </div>
               </div>
             )}
