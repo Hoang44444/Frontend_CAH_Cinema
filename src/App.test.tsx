@@ -66,8 +66,7 @@ describe('App Routing (Kiểm tra định tuyến ứng dụng)', () => {
     renderWithProviders(<App />, { initialEntries: ['/'] });
 
     await waitFor(() => {
-      expect(screen.getAllByText(/CAH/).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(/CINEMA/).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/MOVIX/i).length).toBeGreaterThan(0);
     });
   });
 

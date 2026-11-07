@@ -127,7 +127,7 @@ export default function AuthPage() {
         {tab === 'forgot' && <ForgotForm onDone={() => setTab('login')} />}
 
         <span className="note">
-          Bằng việc tiếp tục, bạn đồng ý với điều khoản sử dụng của CAH Cinema.{' '}
+          Bằng việc tiếp tục, bạn đồng ý với điều khoản sử dụng của Movix.{' '}
           <Link to="/">Về trang chủ</Link>
         </span>
       </div>

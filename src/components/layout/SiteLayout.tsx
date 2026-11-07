@@ -8,7 +8,7 @@ import './layout.css';
 export function Logo({ small, to = '/' }: { small?: boolean; to?: string }) {
   return (
     <Link to={to} className={`logo${small ? ' logo--sm' : ''}`}>
-      CAH<span className="logo__dot">.</span>CINEMA
+      MOVIX<span className="logo__dot">.</span>
     </Link>
   );
 }
@@ -130,7 +130,7 @@ function SiteFooter() {
     <footer className="site-footer">
       <div className="stack" style={{ gap: 6 }}>
         <Logo small />
-        <span>Hệ thống đặt vé CAH Cinema — đồ án môn Kiểm thử phần mềm.</span>
+        <span>Hệ thống đặt vé Movix — đồ án môn Kiểm thử phần mềm.</span>
       </div>
       <div className="stack" style={{ gap: 6 }}>
         <strong style={{ color: 'var(--ink)' }}>Hỗ trợ</strong>

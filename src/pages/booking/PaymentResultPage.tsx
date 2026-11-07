@@ -343,7 +343,7 @@ export default function PaymentResultPage() {
   const movieTitle = invoice?.movieTitle || pendingInfo?.movieTitle || 'Vé xem phim';
   const moviePosterUrl = invoice?.moviePosterUrl || pendingInfo?.moviePosterUrl || null;
   const movieFormat = invoice?.movieFormat || pendingInfo?.format || '2D';
-  const cinemaName = invoice?.cinemaName || pendingInfo?.cinemaName || 'Rạp CAH Cinema';
+  const cinemaName = invoice?.cinemaName || pendingInfo?.cinemaName || 'Rạp Movix';
   const roomName = invoice?.roomName || pendingInfo?.roomName || 'Phòng chiếu';
   const startTime = invoice?.startTime || pendingInfo?.startTime || null;
   const seatChips = useMemo(
