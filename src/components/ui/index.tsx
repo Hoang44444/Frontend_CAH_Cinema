@@ -1,5 +1,11 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react';
-import { useEffect } from 'react';
+import type {
+  ButtonHTMLAttributes,
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+} from 'react';
+import { createContext, useContext, useEffect, useId } from 'react';
 import { ApiError } from '@/lib/http';
 import { initials as toInitials } from '@/lib/format';
 import './ui.css';
@@ -198,6 +204,9 @@ export function Card({
 
 /* ---------- Form fields ---------- */
 
+/** Lets Input/Textarea pick up the id their surrounding Field's label points at. */
+const FieldIdContext = createContext<string | undefined>(undefined);
+
 export function Field({
   label,
   hint,
@@ -211,26 +220,48 @@ export function Field({
   children: ReactNode;
   trailing?: ReactNode;
 }) {
+  const id = useId();
   return (
     <div className="field">
       {(label || trailing) && (
         <div className="row-between">
-          {label && <span className="field__label">{label}</span>}
+          {label && (
+            <label className="field__label" htmlFor={id}>
+              {label}
+            </label>
+          )}
           {trailing}
         </div>
       )}
-      {children}
+      <FieldIdContext.Provider value={id}>{children}</FieldIdContext.Provider>
       {error ? <span className="field__error">{error}</span> : hint ? <span className="field__hint">{hint}</span> : null}
     </div>
   );
 }
 
-export function Input({ small, className = '', ...rest }: InputHTMLAttributes<HTMLInputElement> & { small?: boolean }) {
-  return <input className={`input${small ? ' input--sm' : ''} ${className}`.trim()} {...rest} />;
+export function Input({
+  small,
+  className = '',
+  id,
+  ...rest
+}: InputHTMLAttributes<HTMLInputElement> & { small?: boolean }) {
+  const fieldId = useContext(FieldIdContext);
+  return <input id={id ?? fieldId} className={`input${small ? ' input--sm' : ''} ${className}`.trim()} {...rest} />;
 }
 
-export function Textarea({ className = '', ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea className={`textarea ${className}`.trim()} {...rest} />;
+export function Select({
+  small,
+  className = '',
+  id,
+  ...rest
+}: SelectHTMLAttributes<HTMLSelectElement> & { small?: boolean }) {
+  const fieldId = useContext(FieldIdContext);
+  return <select id={id ?? fieldId} className={`input${small ? ' input--sm' : ''} ${className}`.trim()} {...rest} />;
+}
+
+export function Textarea({ className = '', id, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const fieldId = useContext(FieldIdContext);
+  return <textarea id={id ?? fieldId} className={`textarea ${className}`.trim()} {...rest} />;
 }
 
 export function Toggle({

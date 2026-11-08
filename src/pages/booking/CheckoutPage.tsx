@@ -389,7 +389,9 @@ export default function CheckoutPage() {
 
           <div className="summary__total">
             <span style={{ fontSize: 14, color: 'var(--ink-4)' }}>Tổng thanh toán</span>
-            <span className="summary__grand">{vnd(estimatedGrand)}</span>
+            <span className="summary__grand" data-testid="checkout-total">
+              {vnd(estimatedGrand)}
+            </span>
           </div>
 
           <div className="stack" style={{ gap: 8 }}>

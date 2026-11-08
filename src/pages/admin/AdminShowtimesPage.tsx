@@ -3,7 +3,7 @@ import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/rea
 import { cinemaApi, movieApi, showtimeApi } from '@/api/endpoints';
 import type { MovieFormat, ShowtimeDetailDTO, ShowtimeStatus } from '@/api/types';
 import { AdminTopbar } from '@/components/layout/RoleShells';
-import { Button, EmptyState, ErrorState, Field, Input, Loading, Modal } from '@/components/ui';
+import { Button, EmptyState, ErrorState, Field, Input, Loading, Modal, Select } from '@/components/ui';
 import { addDays, dowDateLong, hhmm, isoDate, parseLocal, startOfToday, vnd } from '@/lib/format';
 import { useToast } from '@/store/toast';
 import './admin.css';
@@ -343,8 +343,8 @@ export default function AdminShowtimesPage() {
             }}
           >
             <Field label="Phim *">
-              <select
-                className="input input--sm"
+              <Select
+                small
                 required
                 value={form.movieId}
                 onChange={(event) => setForm({ ...form, movieId: event.target.value })}
@@ -355,12 +355,12 @@ export default function AdminShowtimesPage() {
                     {movie.title}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
 
             <Field label="Phòng *">
-              <select
-                className="input input--sm"
+              <Select
+                small
                 required
                 value={form.roomId}
                 onChange={(event) => setForm({ ...form, roomId: event.target.value })}
@@ -371,12 +371,12 @@ export default function AdminShowtimesPage() {
                     {room.roomName}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
 
             <Field label="Định dạng *">
-              <select
-                className="input input--sm"
+              <Select
+                small
                 value={form.format}
                 onChange={(event) => setForm({ ...form, format: event.target.value as MovieFormat })}
               >
@@ -385,7 +385,7 @@ export default function AdminShowtimesPage() {
                     {value}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
 
             <Field label="Bắt đầu *">

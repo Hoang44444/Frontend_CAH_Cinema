@@ -2,13 +2,13 @@
 
 Có 3 cách, chọn theo việc bạn cần làm.
 
-| | Cách A — chỉ frontend | Cách B — full stack local | Cách C — backend test online |
+| | Cách A — chỉ frontend | Cách B — full stack local | Cách C — mở ra internet qua subdomain |
 | --- | --- | --- | --- |
-| Cần gì | Node.js | Node + JDK 17 + Docker (Postgres, Redis) | Node.js + mạng |
-| Thời gian | ~1 phút | ~20–30 phút lần đầu | ~1 phút |
-| Thấy được | Mọi màn hình, mọi role | Mọi màn hình **có dữ liệu thật** | Mọi màn hình, dữ liệu thật trên server test |
-| Dữ liệu | Rỗng / báo lỗi tải | Thật, tự nạp seed | Thật, do server test giữ |
-| Dùng để | Review UI, chụp hình, test routing & phân quyền phía client | Test chức năng, luồng đặt vé, thanh toán | Test nhanh mà không phải dựng backend |
+| Cần gì | Node.js | Node + JDK 17 + Docker (Postgres, Redis) | Xong Cách B, thêm `cloudflared` |
+| Thời gian | ~1 phút | ~20–30 phút lần đầu | +5 phút sau Cách B |
+| Thấy được | Mọi màn hình, mọi role | Mọi màn hình **có dữ liệu thật** | Như Cách B, nhưng máy khác và bản GitHub Pages cũng vào được |
+| Dữ liệu | Rỗng / báo lỗi tải | Thật, tự nạp seed | Thật, vẫn nằm trên máy chạy tunnel |
+| Dùng để | Review UI, chụp hình, test routing & phân quyền phía client | Test chức năng, luồng đặt vé, thanh toán | Cho bản deploy có dữ liệu, demo cho người khác |
 
 ---
 
@@ -312,32 +312,115 @@ Cách khác: tự thêm vài suất ở `/admin/showtimes`.
 
 ---
 
-## Cách C — Dùng backend test đã deploy
+## Cách C — Đưa backend ra internet bằng Cloudflare Tunnel
 
 > Backend đã deploy nằm tại subdomain `cinema.mhoang26ct.online`.
 > (Domain gốc `mhoang26ct.online` là GitHub Pages frontend).
+> Chỉ cần dùng backend đó thì đặt biến như mục **Frontend** bên dưới, không cần tunnel.
 
-Trong `.env` của frontend:
+Tunnel dành cho việc mở backend **trên máy mình** ra internet. `cloudflared` chạy
+trên máy đang giữ backend, tự mở kết nối ra Cloudflare; Cloudflare nhận HTTPS ở một
+hostname công khai rồi đẩy request vào `localhost:8080`. Không cần thuê server,
+không mở cổng router, vẫn có TLS thật.
+
+Dùng khi cần demo dữ liệu trên máy mình cho người khác mở bằng máy họ.
+
+> **`api.mhoang26ct.online` không dùng được.** Zone DNS của `mhoang26ct.online`
+> nằm trong một tài khoản Cloudflare khác (nameserver `anton`/`gemma`), nên không
+> tạo được bản ghi `api` ở đó. Cloudflare còn bắt buộc tunnel và bản ghi DNS phải
+> **cùng một tài khoản**, nên kể cả nhờ chủ zone thêm hộ một dòng CNAME cũng không
+> chạy. Ô *Custom domain* trong GitHub Pages chỉ khai báo tên miền cho GitHub, nó
+> không tạo bản ghi DNS nào.
+
+### Cách nhanh — quick tunnel (không cần tài khoản, không cần domain)
+
+Dựng backend + Postgres + Redis theo **Cách B** trước. Tunnel chỉ là lớp vỏ:
+không có gì nghe ở `:8080` thì nó trả `502`. Rồi:
+
+```powershell
+winget install --id Cloudflare.cloudflared --exact
+```
+
+```powershell
+cloudflared tunnel --no-autoupdate --url http://localhost:8080
+```
+
+Sau ~20 giây nó in ra một hostname dạng
+`https://<bốn-từ-ngẫu-nhiên>.trycloudflare.com`. Để nguyên cửa sổ đó chạy.
+
+Kiểm tra:
+
+```bash
+curl https://<hostname>.trycloudflare.com/api/v1/public/genres/all
+```
+
+**Hostname đổi mỗi lần khởi động lại tunnel**, và tắt máy là chết. Mỗi lần đổi
+phải sửa lại `.env` (và `.env.production` + push nếu muốn bản deploy dùng được).
+
+### Cách ổn định — named tunnel trên domain của chính bạn
+
+Cần một domain bạn tự mua và tự add vào tài khoản Cloudflare của mình (domain rẻ
+`.xyz` / `.io.vn` vài chục nghìn một năm là đủ). Khi zone đã **Active**:
+
+```powershell
+cloudflared tunnel login
+```
+
+```powershell
+cloudflared tunnel create cah-cinema
+```
+
+```powershell
+cloudflared tunnel route dns cah-cinema api.<domain-của-bạn>
+```
+
+Rồi tạo `%USERPROFILE%\.cloudflared\config.yml`:
+
+```yaml
+tunnel: cah-cinema
+credentials-file: C:\Users\<user>\.cloudflared\<tunnel-id>.json
+ingress:
+  - hostname: api.<domain-của-bạn>
+    service: http://localhost:8080
+  - service: http_status:404
+```
+
+Mỗi lần chạy: `cloudflared tunnel run cah-cinema`. Hostname cố định, không đổi
+nữa. `cloudflared tunnel login` chỉ liệt kê zone đang **Active** — zone còn
+Pending thì trang authorize không hiện domain để chọn.
+
+### Frontend
 
 ```env
+# Dùng backend đã deploy
 VITE_API_BASE_URL=https://cinema.mhoang26ct.online
 VITE_PROXY_TARGET=https://cinema.mhoang26ct.online
+
+# Hoặc dùng tunnel của máy mình
+# VITE_API_BASE_URL=https://<hostname>.trycloudflare.com
+# VITE_PROXY_TARGET=http://localhost:8080
 ```
 
 ```bash
 npm run dev
 ```
 
-`VITE_API_BASE_URL` có giá trị thì app gọi thẳng domain, dev proxy không dùng tới.
-Để trống biến này thì `/api` đi qua dev proxy và `VITE_PROXY_TARGET` mới có tác dụng —
-dùng cách đó nếu sau này server test siết CORS.
+`VITE_API_BASE_URL` có giá trị thì app gọi thẳng hostname đó, dev proxy không dùng
+tới. Để trống biến này thì `/api` đi qua dev proxy và `VITE_PROXY_TARGET` mới có
+tác dụng — dùng cách đó khi tunnel không chạy mà vẫn muốn test với backend local.
 
 Đổi `.env` xong phải **restart `npm run dev`** (Vite chỉ đọc `.env` lúc khởi động).
 
-**Giới hạn hiện tại:** server test chưa có suất chiếu nào
-(`/api/v1/public/showtimes/...` trả rỗng cho mọi rạp và mọi ngày), nên 3 màn
-chọn ghế → thanh toán → kết quả chưa đi được. Vào `/admin/showtimes` bằng tài
-khoản admin của server test để thêm suất, hoặc dùng Cách B cho luồng đặt vé.
+Frontend ở `mhoang26ct.online` gọi sang hostname khác hoàn toàn được: CORS không
+vướng vì `SecurityConfig.java` để `allowedOrigins("*")`, và token đi qua header
+`Authorization` chứ không dùng cookie.
+
+### Callback thanh toán
+
+`MOMO_IPN_URL` và `VNPAY_IPN_URL` trong `.env` của backend vẫn là
+`http://localhost:8080/...`, tức cổng thanh toán ngoài internet không gọi về được.
+Muốn test IPN thật thì trỏ hai biến đó sang hostname của tunnel — nhưng với quick
+tunnel thì phải sửa lại mỗi lần hostname đổi.
 
 ---
 
@@ -405,4 +488,8 @@ chiếu từ `sessionStorage` (`store/bookingDraft.ts`), vào thẳng URL sẽ t
 | Vào `/admin` thấy "Không có quyền" | Tài khoản không phải ROLE_ADMIN. Seed không có admin — xem bước 4. |
 | Đăng ký không nhận được OTP | Chưa cấu hình `GMAIL_USERNAME` / `GG_APP_PASSWORD`. |
 | `/admin/reconciliation`, `/staff/refunds` thiếu dữ liệu | Backend chưa có endpoint cho phần này — xem mục "Những chỗ backend chưa có endpoint" trong `README.md`. |
-| Màn chọn ghế trống dù đã có phim | Chưa có suất chiếu *trong tương lai*. Seed local chỉ có suất 09/05–07/06/2026 (đã qua); server test thì rỗng hẳn. Vào `/admin/showtimes` thêm suất. |
+| Màn chọn ghế trống dù đã có phim | Chưa có suất chiếu *trong tương lai*. Seed chỉ có suất 09/05–07/06/2026 (đã qua). Dịch cả lô theo Cách B bước 8, hoặc vào `/admin/showtimes` thêm suất. |
+| Hostname tunnel trả `530` | Tunnel không chạy. Bật lại `cloudflared tunnel --url http://localhost:8080`. |
+| Hostname tunnel trả `502` | Tunnel chạy nhưng backend thì không. Kiểm tra `curl http://localhost:8080/api/v1/public/genres/all`. |
+| Toàn bộ API hỏng sau khi khởi động lại tunnel | Quick tunnel cấp hostname mới mỗi lần. Chép hostname mới vào `.env` rồi restart `npm run dev`. |
+| `api.mhoang26ct.online` không phân giải | Subdomain đó chưa bao giờ tồn tại và không tạo được — zone DNS nằm ở tài khoản Cloudflare khác. Xem đầu Cách C. |

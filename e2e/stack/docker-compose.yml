@@ -1,0 +1,83 @@
+# Stack riêng cho Playwright E2E, không đụng tới cah-postgres/cah-redis/cah-backend của dev.
+# Postgres dùng tmpfs nên mỗi lần `npm run e2e:stack:up` là một DB sạch, nạp lại từ seed.
+# Mọi secret dưới đây là giá trị giả chỉ dùng cho môi trường này.
+name: cah-e2e
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: cinema_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: Asia/Ho_Chi_Minh
+      PGTZ: Asia/Ho_Chi_Minh
+    tmpfs:
+      - /var/lib/postgresql/data
+    volumes:
+      - ../.stack/backend/cah_cinema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ../.stack/backend/seed_background_data.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+      - ./seed/03_accounts.sql:/docker-entrypoint-initdb.d/03_accounts.sql:ro
+    ports:
+      - "55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cinema_db"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    # Không lưu xuống đĩa: mã suất chiếu đếm lại từ đầu sau mỗi lần nạp DB,
+    # nên lock của lần chạy trước sẽ trùng với suất mới.
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    tmpfs:
+      - /data
+    ports:
+      - "56379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  backend:
+    build:
+      context: ../.stack/backend
+      dockerfile: ../../stack/backend.Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/cinema_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      REDIS_PORT: "6379"
+      SPRING_DATA_REDIS_HOST: redis
+      JWT_SECRET: 9a4f2c8d3b7a1e5f8c6b4d2e0a8f7c6b5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a
+      GOOGLE_CLIENT_ID: e2e-unused
+      GOOGLE_CLIENT_SECRET: e2e-unused
+      CORS_ALLOWED_ORIGINS: http://localhost:4173
+      # Không gửi mail thật: trỏ SMTP vào một cổng đóng.
+      GMAIL_USERNAME: e2e@test.local
+      GG_APP_PASSWORD: e2e-unused
+      SPRING_MAIL_HOST: 127.0.0.1
+      SPRING_MAIL_PORT: "9"
+      MOMO_PARTNER_CODE: e2e-unused
+      MOMO_ACCESS_KEY: e2e-unused
+      MOMO_SECRET_KEY: e2e-unused
+      MOMO_ENDPOINT: http://127.0.0.1:9/disabled
+      MOMO_REDIRECT_URL: http://localhost:4173/payment/return
+      MOMO_IPN_URL: http://localhost:8081/api/v1/public/momo/ipn
+      # e2e/fixtures/vnpay.ts ký IPN bằng đúng secret này.
+      VNPAY_TMN_CODE: E2ETEST1
+      VNPAY_HASH_SECRET: e2e-vnpay-hash-secret-not-a-real-key
+      # Không gọi API đối soát/hoàn tiền thật của VNPay.
+      VNPAY_API_URL: http://127.0.0.1:9/disabled
+      VNPAY_RETURN_URL: http://localhost:4173/payment/return
+      VNPAY_IPN_URL: http://localhost:8081/api/v1/public/vnpay/ipn
+      STRIPE_ENABLED: "false"

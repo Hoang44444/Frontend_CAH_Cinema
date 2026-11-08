@@ -232,7 +232,9 @@ export default function SeatsPage() {
           {hold !== null && (
             <div className="hold-bar">
               <span style={{ color: 'var(--ink-3)' }}>Giữ ghế còn</span>
-              <span className="hold-bar__time">{mmss(hold)}</span>
+              <span className="hold-bar__time" data-testid="seat-hold-timer">
+                {mmss(hold)}
+              </span>
             </div>
           )}
 
@@ -240,7 +242,9 @@ export default function SeatsPage() {
             <span style={{ fontSize: 14, color: 'var(--ink-4)' }}>
               Tạm tính ({selected.length} ghế)
             </span>
-            <span className="subtotal__amount">{vnd(seatTotal)}</span>
+            <span className="subtotal__amount" data-testid="seat-subtotal">
+              {vnd(seatTotal)}
+            </span>
           </div>
 
           {!context && (

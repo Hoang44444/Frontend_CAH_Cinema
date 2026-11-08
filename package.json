@@ -10,6 +10,12 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:ui": "playwright test --project=mock",
+    "test:e2e": "playwright test --project=e2e",
+    "test:smoke": "playwright test -c playwright.smoke.config.ts",
+    "typecheck:e2e": "tsc -p e2e/tsconfig.json",
+    "e2e:stack:up": "node e2e/stack/stack.mjs up",
+    "e2e:stack:down": "node e2e/stack/stack.mjs down",
     "postbuild": "node -e \"require('fs').copyFileSync('dist/index.html','dist/404.html')\""
   },
   "dependencies": {
@@ -20,12 +26,16 @@
     "react-router-dom": "6.28.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",
+    "@types/node": "20.19.25",
+    "@types/pg": "8.15.6",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
     "@vitejs/plugin-react": "4.3.4",
     "jsdom": "^25.0.1",
+    "pg": "8.16.3",
     "typescript": "5.7.2",
     "vite": "5.4.11",
     "vitest": "^2.1.9"

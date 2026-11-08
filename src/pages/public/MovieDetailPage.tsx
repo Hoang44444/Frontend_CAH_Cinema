@@ -241,6 +241,7 @@ export default function MovieDetailPage() {
                                   key={show.showtimeId}
                                   type="button"
                                   className="time"
+                                  data-testid={`showtime-${show.showtimeId}`}
                                   data-state={bookable ? 'ok' : 'sold'}
                                   disabled={!bookable}
                                   onClick={() => {
