@@ -78,7 +78,8 @@ export interface AuthResponseDTO {
 }
 
 export interface FpVerifyOtpResponse {
-  resetToken: string;
+  token?: string;
+  resetToken?: string;
 }
 
 export interface InvoiceSeat {
@@ -347,9 +348,23 @@ export interface CreateBookingResponseDTO {
   totalAmount: number;
 }
 
+export interface TicketItemResponseDTO {
+  ticketId: number;
+  bookingId: number;
+  showtimeId: number;
+  seatId: number;
+  seatName: string;
+  price: number;
+  checkinCode: string;
+  qrCode: string;
+  status: string;
+  isCheckedIn: boolean;
+}
+
 export interface BookingStatusResponseDTO {
   bookingId: number;
   status: BookingStatus;
+  tickets?: TicketItemResponseDTO[] | null;
 }
 
 export interface CancellationQuoteDTO {

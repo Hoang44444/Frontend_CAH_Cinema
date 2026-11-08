@@ -65,7 +65,7 @@ export default function CinemasPage() {
       <div className="stack" style={{ gap: 18 }}>
         <div className="row-between" style={{ alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
           <h2 className="display" style={{ fontSize: 44 }}>
-            {current ? current.name.replace('CAH Cinema ', '') : '—'}
+            {current ? current.name.replace(/^(CAH Cinema|Movix)\s*/i, '') : '—'}
           </h2>
           <select
             className="header-chip"

@@ -13,15 +13,30 @@ const KEY = 'cah.pendingPayment';
 /** Longer than any payment deadline, short enough not to resurrect an old booking. */
 const TTL_MS = 2 * 60 * 60 * 1000;
 
-interface PendingPayment {
+export interface PendingPaymentMetadata {
+  movieTitle?: string;
+  moviePosterUrl?: string | null;
+  cinemaName?: string;
+  roomName?: string;
+  format?: string;
+  startTime?: string;
+  seatNames?: string[];
+  totalAmount?: number;
+  paymentMethod?: string;
+}
+
+export interface PendingPayment extends PendingPaymentMetadata {
   bookingId: number;
   savedAt: number;
 }
 
 export const pendingPaymentStore = {
-  save(bookingId: number) {
+  save(bookingId: number, metadata?: PendingPaymentMetadata) {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ bookingId, savedAt: Date.now() }));
+      localStorage.setItem(
+        KEY,
+        JSON.stringify({ bookingId, savedAt: Date.now(), ...(metadata ?? {}) }),
+      );
     } catch {
       // Private mode / full quota: the gateway's query string is the only hope left.
     }
@@ -33,6 +48,17 @@ export const pendingPaymentStore = {
       const value = JSON.parse(raw) as PendingPayment;
       if (!Number.isFinite(value?.bookingId) || !Number.isFinite(value?.savedAt)) return null;
       return Date.now() - value.savedAt > TTL_MS ? null : value.bookingId;
+    } catch {
+      return null;
+    }
+  },
+  getInfo(): PendingPayment | null {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return null;
+      const value = JSON.parse(raw) as PendingPayment;
+      if (!Number.isFinite(value?.bookingId) || !Number.isFinite(value?.savedAt)) return null;
+      return Date.now() - value.savedAt > TTL_MS ? null : value;
     } catch {
       return null;
     }

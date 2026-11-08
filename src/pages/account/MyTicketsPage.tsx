@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QRCodeSVG } from 'qrcode.react';
 import { bookingApi, userApi } from '@/api/endpoints';
 import type { CancellationQuoteDTO, FullInvoiceDTO } from '@/api/types';
 import {
@@ -86,6 +87,13 @@ export default function MyTicketsPage() {
   }, [visible, selectedId]);
 
   const selected = invoices.find((invoice) => invoice.bookingId === selectedId) ?? null;
+  const selectedHasIssuedTickets =
+    selected?.bookingStatus === 'PAID' || selected?.bookingStatus === 'CHECKED_IN';
+  const tickets = useQuery({
+    queryKey: ['booking-tickets', selectedId],
+    queryFn: () => bookingApi.tickets(selectedId!),
+    enabled: selectedId !== null && selectedHasIssuedTickets,
+  });
 
   /** Step 1 of cancelling: fetch the quote the backend will honour. */
   const openQuote = useMutation({
@@ -136,7 +144,7 @@ export default function MyTicketsPage() {
         {invoices.length === 0 ? (
           <EmptyState
             title="Chưa có booking nào"
-            description="Khi bạn đặt vé, booking sẽ xuất hiện ở đây. /users/me trả về 5 booking gần nhất."
+            description="Thông tin vé sẽ xuất hiện tại đây sau khi bạn đặt vé."
           />
         ) : visible.length === 0 ? (
           <EmptyState title="Không có booking phù hợp" description="Thử chọn bộ lọc khác." />
@@ -176,9 +184,6 @@ export default function MyTicketsPage() {
           ))
         )}
 
-        <span className="note">
-          Danh sách này là 5 booking gần nhất do <span className="mono">GET /api/v1/users/me</span> trả về.
-        </span>
       </div>
 
       {/* ---- Ticket detail ---- */}
@@ -241,7 +246,7 @@ export default function MyTicketsPage() {
             <div className="row-between" style={{ paddingTop: 16, borderTop: '1px solid var(--line)', gap: 12 }}>
               <span style={{ fontSize: 13, color: 'var(--ink-4)', textWrap: 'pretty' }}>
                 {selected.bookingStatus === 'PAID'
-                  ? 'Hủy được tới 2 giờ trước giờ chiếu. Tỷ lệ hoàn do backend tính lại khi bạn xem báo giá.'
+                  ? 'Bạn có thể xem số tiền được hoàn trước khi xác nhận hủy vé.'
                   : `Trạng thái hiện tại: ${selected.bookingStatus}.`}
               </span>
               {selected.bookingStatus === 'PAID' && (
@@ -258,20 +263,68 @@ export default function MyTicketsPage() {
           </div>
 
           <div className="ticket__stub">
-            <div className="ticket__qr">
-              {selected.bookingStatus === 'PAID' || selected.bookingStatus === 'CHECKED_IN' ? (
-                <span style={{ fontSize: 12, color: 'var(--ink-5)', textAlign: 'center', lineHeight: 1.5 }}>
-                  Mã QR của vé được backend phát hành riêng cho từng vé (purpose&nbsp;
-                  <span className="mono">TICKET_QR</span>) và chưa có endpoint để lấy về, nên không hiển thị ở
-                  đây.
-                </span>
+            {selectedHasIssuedTickets ? (
+              tickets.isLoading ? (
+                <Loading label="Đang tải mã QR vé…" />
+              ) : tickets.isError ? (
+                <div style={{ display: 'grid', gap: 10, justifyItems: 'center' }}>
+                  <span style={{ fontSize: 12, color: 'var(--danger)' }}>Không tải được mã QR của booking này.</span>
+                  <Button variant="outline" size="xs" onClick={() => void tickets.refetch()}>
+                    Thử lại
+                  </Button>
+                </div>
+              ) : tickets.data?.length ? (
+                <div style={{ display: 'grid', gap: 14, width: '100%', justifyItems: 'center' }}>
+                  {tickets.data.map((ticket) => {
+                    const qrValue = ticket.qrCode || ticket.checkinCode;
+                    if (!qrValue) return null;
+                    return (
+                      <div
+                        key={ticket.ticketId}
+                        style={{
+                          display: 'grid',
+                          justifyItems: 'center',
+                          gap: 8,
+                          width: '100%',
+                          maxWidth: 240,
+                          padding: 12,
+                          border: '1px solid var(--line)',
+                          borderRadius: 12,
+                          background: 'var(--surface)',
+                        }}
+                      >
+                        <strong style={{ fontSize: 14 }}>Ghế {ticket.seatName}</strong>
+                        <QRCodeSVG
+                          value={qrValue}
+                          size={180}
+                          level="L"
+                          marginSize={4}
+                          minVersion={1}
+                          title={`QR vé ${ticket.seatName}`}
+                        />
+                        <code style={{ fontSize: 15, fontWeight: 800, letterSpacing: '0.08em' }}>
+                          {ticket.checkinCode || qrValue}
+                        </code>
+                        {ticket.isCheckedIn && (
+                          <span style={{ fontSize: 12, color: 'var(--ok)' }}>Đã sử dụng</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               ) : (
+                <span style={{ fontSize: 12, color: 'var(--ink-5)', textAlign: 'center' }}>
+                  Booking đã thanh toán nhưng chưa có vé được phát hành. Hãy thử tải lại sau ít phút.
+                </span>
+              )
+            ) : (
+              <div className="ticket__qr">
                 <span style={{ fontSize: 12, color: 'var(--ink-5)' }}>Chưa phát hành vé</span>
-              )}
-            </div>
-            <span style={{ fontWeight: 700, fontSize: 14 }}>Đưa mã cho nhân viên soát vé</span>
+              </div>
+            )}
+            <span style={{ fontWeight: 700, fontSize: 14 }}>Đưa mã QR hoặc mã soát vé cho nhân viên</span>
             <span style={{ fontSize: 12, color: 'var(--ink-4)' }}>
-              Mở cửa soát từ 30 phút trước giờ chiếu. Mỗi vé chỉ quét được một lần.
+              Xuất trình mã QR hoặc đọc mã soát vé khi vào rạp.
             </span>
           </div>
         </div>

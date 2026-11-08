@@ -234,7 +234,7 @@ chạy**. Dùng 3 tài khoản ở bước 4 để đăng nhập thay vì đăng
 #### Return URL của cổng thanh toán
 
 Bốn biến dưới là **URL của frontend**, không phải backend. Trỏ nhầm vào backend —
-ví dụ `STRIPE_SUCCESS_URL=https://mhoang26ct.online/api/v1/public/stripe/return` —
+ví dụ `STRIPE_SUCCESS_URL=https://cinema.mhoang26ct.online/api/v1/public/stripe/return` —
 thì trả tiền xong trình duyệt dừng lại ở trang text trống của
 `StripePaymentController.returned()` và không bao giờ về tới màn hình kết quả.
 
@@ -314,11 +314,16 @@ Cách khác: tự thêm vài suất ở `/admin/showtimes`.
 
 ## Cách C — Đưa backend ra internet bằng Cloudflare Tunnel
 
-Backend không có VPS. `cloudflared` chạy trên máy đang giữ backend, tự mở kết nối
-ra Cloudflare; Cloudflare nhận HTTPS ở một hostname công khai rồi đẩy request vào
-`localhost:8080`. Không cần thuê server, không mở cổng router, vẫn có TLS thật.
+> Backend đã deploy nằm tại subdomain `cinema.mhoang26ct.online`.
+> (Domain gốc `mhoang26ct.online` là GitHub Pages frontend).
+> Chỉ cần dùng backend đó thì đặt biến như mục **Frontend** bên dưới, không cần tunnel.
 
-Dùng khi cần bản GitHub Pages có dữ liệu, hoặc demo cho người khác mở bằng máy họ.
+Tunnel dành cho việc mở backend **trên máy mình** ra internet. `cloudflared` chạy
+trên máy đang giữ backend, tự mở kết nối ra Cloudflare; Cloudflare nhận HTTPS ở một
+hostname công khai rồi đẩy request vào `localhost:8080`. Không cần thuê server,
+không mở cổng router, vẫn có TLS thật.
+
+Dùng khi cần demo dữ liệu trên máy mình cho người khác mở bằng máy họ.
 
 > **`api.mhoang26ct.online` không dùng được.** Zone DNS của `mhoang26ct.online`
 > nằm trong một tài khoản Cloudflare khác (nameserver `anton`/`gemma`), nên không
@@ -387,8 +392,13 @@ Pending thì trang authorize không hiện domain để chọn.
 ### Frontend
 
 ```env
-VITE_API_BASE_URL=https://<hostname>.trycloudflare.com
-VITE_PROXY_TARGET=http://localhost:8080
+# Dùng backend đã deploy
+VITE_API_BASE_URL=https://cinema.mhoang26ct.online
+VITE_PROXY_TARGET=https://cinema.mhoang26ct.online
+
+# Hoặc dùng tunnel của máy mình
+# VITE_API_BASE_URL=https://<hostname>.trycloudflare.com
+# VITE_PROXY_TARGET=http://localhost:8080
 ```
 
 ```bash

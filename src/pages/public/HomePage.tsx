@@ -104,7 +104,7 @@ function QuickBar({ movies }: { movies: MovieSummaryDTO[] }) {
           <option value="">Tất cả rạp</option>
           {cinemas?.map((cinema) => (
             <option key={cinema.cinemaId} value={cinema.cinemaId}>
-              {cinema.name.replace('CAH Cinema ', '')}
+              {cinema.name.replace(/^(CAH Cinema|Movix)\s*/i, '')}
             </option>
           ))}
         </select>
@@ -169,8 +169,8 @@ export default function HomePage() {
               <h1 className="hero__title">{hero.title}</h1>
               <p className="hero__desc">
                 {hero.duration
-                  ? `${duration(hero.duration)} · Đang chiếu tại các rạp CAH Cinema. Chọn suất và giữ ghế trong vài phút.`
-                  : 'Đang chiếu tại các rạp CAH Cinema. Chọn suất và giữ ghế trong vài phút.'}
+                  ? `${duration(hero.duration)} · Đang chiếu tại các rạp Movix. Chọn suất và giữ ghế trong vài phút.`
+                  : 'Đang chiếu tại các rạp Movix. Chọn suất và giữ ghế trong vài phút.'}
               </p>
               <div className="hero__cta">
                 <Link
@@ -188,7 +188,7 @@ export default function HomePage() {
           ) : (
             <EmptyState
               title="Chưa có phim nào"
-              description="Backend chưa trả về phim đang chiếu. Thêm phim trong trang Quản trị → Phim."
+              description="Hiện chưa có phim đang chiếu. Vui lòng quay lại sau."
             />
           )}
         </div>

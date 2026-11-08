@@ -3,6 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -28,17 +30,22 @@ jobs:
 
       - run: npm ci
 
-      # Đọc .env.production: base path /Frontend_CAH_Cinema/ và API https://mhoang26ct.online
+      - run: npm test
+
+      # Đọc .env.production: base path / và API https://cinema.mhoang26ct.online
       # postbuild copy index.html -> 404.html để GitHub Pages trả đúng SPA khi vào thẳng route.
       - run: npm run build
 
       - uses: actions/configure-pages@v5
+        if: github.event_name != 'pull_request'
 
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: dist
 
   deploy:
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:
