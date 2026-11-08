@@ -578,7 +578,7 @@ export default function PaymentResultPage() {
 
                 <div className="result-receipt__total-row">
                   <span className="result-receipt__total-label">Tổng tiền thanh toán</span>
-                  <span className="result-receipt__total-value">
+                  <span className="result-receipt__total-value" data-testid="payment-total">
                     {vnd(totalAmount)}
                   </span>
                 </div>
@@ -678,6 +678,7 @@ export default function PaymentResultPage() {
                           <strong>Vé ghế {ticket.seatName}</strong>
                           <span style={{ color: 'var(--ink-4)', fontSize: 13 }}>Mã soát vé</span>
                           <code
+                            data-testid="ticket-code"
                             style={{
                               fontSize: 16,
                               fontWeight: 700,

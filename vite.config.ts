@@ -28,6 +28,8 @@ export default defineConfig(({ mode }) => {
       globals: true,
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.ts'],
+      // e2e/**/*.spec.ts là của Playwright, Vitest không được quét vào.
+      include: ['src/**/*.test.{ts,tsx}'],
     },
   };
 });

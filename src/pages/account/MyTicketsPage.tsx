@@ -153,6 +153,7 @@ export default function MyTicketsPage() {
             <button
               type="button"
               className="booking-row"
+              data-testid={`booking-${invoice.bookingId}`}
               key={invoice.bookingId}
               data-selected={invoice.bookingId === selectedId}
               onClick={() => setSelectedId(invoice.bookingId)}

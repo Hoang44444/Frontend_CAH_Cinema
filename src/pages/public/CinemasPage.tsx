@@ -132,6 +132,7 @@ export default function CinemasPage() {
                         key={show.showtimeId}
                         type="button"
                         className="time-chip"
+                        data-testid={`showtime-${show.showtimeId}`}
                         onClick={() => {
                           showtimeContextStore.save({
                             showtimeId: show.showtimeId,

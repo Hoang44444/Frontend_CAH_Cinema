@@ -248,6 +248,7 @@ export default function CounterPage() {
               <button
                 type="button"
                 className="show-row"
+                data-testid={`showtime-${show.showtimeId}`}
                 key={show.showtimeId}
                 data-active={show.showtimeId === showtimeId}
                 onClick={() => setShowtimeId(show.showtimeId)}
